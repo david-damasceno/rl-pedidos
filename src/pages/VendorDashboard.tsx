@@ -62,13 +62,11 @@ const VendorDashboard = () => {
       return;
     }
 
-    // Mock order submission
     toast({
       title: "Sucesso",
       description: isDraft ? "Orçamento salvo com sucesso" : "Pedido enviado com sucesso",
     });
 
-    // Reset form
     setCustomerInfo({
       cnpj: "",
       businessName: "",
