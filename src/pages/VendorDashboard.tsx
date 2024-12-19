@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import { CustomerForm } from "@/components/vendor/CustomerForm";
+import { OrderItemsTable } from "@/components/vendor/OrderItemsTable";
+import { OrderHistory } from "@/components/vendor/OrderHistory";
 
 interface OrderItem {
   id: string;
@@ -24,19 +26,13 @@ const VendorDashboard = () => {
   });
   const [items, setItems] = useState<OrderItem[]>([]);
   const [newItem, setNewItem] = useState<Partial<OrderItem>>({});
-
-  const handleCustomerInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCustomerInfo({
-      ...customerInfo,
-      [e.target.name]: e.target.value,
-    });
-  };
+  const [showHistory, setShowHistory] = useState(false);
 
   const handleAddItem = () => {
     if (!newItem.productCode || !newItem.description || !newItem.quantity || !newItem.unitPrice) {
       toast({
-        title: "Error",
-        description: "Please fill all item fields",
+        title: "Erro",
+        description: "Por favor, preencha todos os campos do item",
         variant: "destructive",
       });
       return;
@@ -56,11 +52,11 @@ const VendorDashboard = () => {
     setNewItem({});
   };
 
-  const handleSubmitOrder = () => {
+  const handleSubmitOrder = (isDraft: boolean = false) => {
     if (!customerInfo.cnpj || !customerInfo.businessName || items.length === 0) {
       toast({
-        title: "Error",
-        description: "Please fill all required fields and add at least one item",
+        title: "Erro",
+        description: "Por favor, preencha todos os campos obrigatórios e adicione pelo menos um item",
         variant: "destructive",
       });
       return;
@@ -68,8 +64,8 @@ const VendorDashboard = () => {
 
     // Mock order submission
     toast({
-      title: "Success",
-      description: "Order submitted successfully",
+      title: "Sucesso",
+      description: isDraft ? "Orçamento salvo com sucesso" : "Pedido enviado com sucesso",
     });
 
     // Reset form
@@ -86,126 +82,54 @@ const VendorDashboard = () => {
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">New Order</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {showHistory ? "Histórico de Pedidos" : "Novo Pedido"}
+            </h1>
+            <Button
+              variant="link"
+              onClick={() => setShowHistory(!showHistory)}
+              className="mt-2"
+            >
+              {showHistory ? "Criar Novo Pedido" : "Ver Histórico"}
+            </Button>
+          </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">Welcome, {user?.name}</span>
+            <span className="text-sm text-gray-600">Bem-vindo, {user?.name}</span>
             <Button variant="outline" onClick={logout}>
-              Logout
+              Sair
             </Button>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">Customer Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">CNPJ</label>
-              <Input
-                name="cnpj"
-                value={customerInfo.cnpj}
-                onChange={handleCustomerInfoChange}
-                placeholder="Enter CNPJ"
-              />
+        {showHistory ? (
+          <OrderHistory />
+        ) : (
+          <>
+            <CustomerForm
+              customerInfo={customerInfo}
+              onCustomerInfoChange={setCustomerInfo}
+            />
+            <OrderItemsTable
+              items={items}
+              newItem={newItem}
+              onNewItemChange={setNewItem}
+              onAddItem={handleAddItem}
+            />
+            <div className="flex gap-4">
+              <Button onClick={() => handleSubmitOrder(false)} className="flex-1">
+                Enviar Pedido
+              </Button>
+              <Button
+                onClick={() => handleSubmitOrder(true)}
+                variant="outline"
+                className="flex-1"
+              >
+                Salvar como Orçamento
+              </Button>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Business Name</label>
-              <Input
-                name="businessName"
-                value={customerInfo.businessName}
-                onChange={handleCustomerInfoChange}
-                placeholder="Enter business name"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Address</label>
-              <Input
-                name="address"
-                value={customerInfo.address}
-                onChange={handleCustomerInfoChange}
-                placeholder="Enter address"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Contact</label>
-              <Input
-                name="contact"
-                value={customerInfo.contact}
-                onChange={handleCustomerInfoChange}
-                placeholder="Enter contact details"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">Order Items</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left p-2">Product Code</th>
-                  <th className="text-left p-2">Description</th>
-                  <th className="text-left p-2">Quantity</th>
-                  <th className="text-left p-2">Discount (%)</th>
-                  <th className="text-left p-2">Unit Price</th>
-                  <th className="text-left p-2">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item) => (
-                  <tr key={item.id} className="border-b">
-                    <td className="p-2">{item.productCode}</td>
-                    <td className="p-2">{item.description}</td>
-                    <td className="p-2">{item.quantity}</td>
-                    <td className="p-2">{item.discount}%</td>
-                    <td className="p-2">${item.unitPrice.toFixed(2)}</td>
-                    <td className="p-2">
-                      ${((item.quantity * item.unitPrice) * (1 - item.discount / 100)).toFixed(2)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-5 gap-4">
-            <Input
-              placeholder="Product Code"
-              value={newItem.productCode || ""}
-              onChange={(e) => setNewItem({ ...newItem, productCode: e.target.value })}
-            />
-            <Input
-              placeholder="Description"
-              value={newItem.description || ""}
-              onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
-            />
-            <Input
-              type="number"
-              placeholder="Quantity"
-              value={newItem.quantity || ""}
-              onChange={(e) => setNewItem({ ...newItem, quantity: Number(e.target.value) })}
-            />
-            <Input
-              type="number"
-              placeholder="Discount %"
-              value={newItem.discount || ""}
-              onChange={(e) => setNewItem({ ...newItem, discount: Number(e.target.value) })}
-            />
-            <Input
-              type="number"
-              placeholder="Unit Price"
-              value={newItem.unitPrice || ""}
-              onChange={(e) => setNewItem({ ...newItem, unitPrice: Number(e.target.value) })}
-            />
-          </div>
-          <Button onClick={handleAddItem} className="mt-4">
-            Add Item
-          </Button>
-        </div>
-
-        <Button onClick={handleSubmitOrder} className="w-full">
-          Submit Order
-        </Button>
+          </>
+        )}
       </div>
     </div>
   );
