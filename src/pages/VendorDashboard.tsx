@@ -48,9 +48,9 @@ const VendorDashboard = () => {
         id: Math.random().toString(),
         productCode: newItem.productCode || "",
         description: newItem.description || "",
-        quantity: Number(newItem.quantity) || 0,
-        discount: Number(newItem.discount) || 0,
-        unitPrice: Number(newItem.unitPrice) || 0,
+        quantity: Number(newItem.quantity),
+        discount: Number(newItem.discount || 0),
+        unitPrice: Number(newItem.unitPrice),
       },
     ]);
     setNewItem({});
@@ -183,19 +183,19 @@ const VendorDashboard = () => {
               type="number"
               placeholder="Quantity"
               value={newItem.quantity || ""}
-              onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })}
+              onChange={(e) => setNewItem({ ...newItem, quantity: Number(e.target.value) })}
             />
             <Input
               type="number"
               placeholder="Discount %"
               value={newItem.discount || ""}
-              onChange={(e) => setNewItem({ ...newItem, discount: e.target.value })}
+              onChange={(e) => setNewItem({ ...newItem, discount: Number(e.target.value) })}
             />
             <Input
               type="number"
               placeholder="Unit Price"
               value={newItem.unitPrice || ""}
-              onChange={(e) => setNewItem({ ...newItem, unitPrice: e.target.value })}
+              onChange={(e) => setNewItem({ ...newItem, unitPrice: Number(e.target.value) })}
             />
           </div>
           <Button onClick={handleAddItem} className="mt-4">
