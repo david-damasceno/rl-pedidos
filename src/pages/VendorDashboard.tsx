@@ -1,211 +1,186 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import { FormularioCliente } from "@/components/pedidos/FormularioCliente";
+import { TabelaItens } from "@/components/pedidos/TabelaItens";
+import { ListaPedidos } from "@/components/pedidos/ListaPedidos";
+import { Pedido, ItemPedido } from "@/types/pedido";
 
-interface OrderItem {
-  id: string;
-  productCode: string;
-  description: string;
-  quantity: number;
-  discount: number;
-  unitPrice: number;
-}
+// Dados mockados para exemplo
+const mockPedidos: Pedido[] = [
+  {
+    id: "1",
+    data: new Date().toISOString(),
+    clienteCNPJ: "12345678901234",
+    clienteRazaoSocial: "Empresa Exemplo LTDA",
+    clienteEndereco: "Rua Exemplo, 123",
+    clienteContato: "contato@exemplo.com",
+    vendedorNome: "João Silva",
+    status: "enviado",
+    itens: [],
+    total: 1500.0,
+  },
+];
 
 const VendorDashboard = () => {
   const { user, logout } = useAuth();
   const { toast } = useToast();
-  const [customerInfo, setCustomerInfo] = useState({
+  const [activeTab, setActiveTab] = useState<"novo" | "pedidos" | "orcamentos">("novo");
+  const [dadosCliente, setDadosCliente] = useState({
     cnpj: "",
-    businessName: "",
-    address: "",
-    contact: "",
+    razaoSocial: "",
+    endereco: "",
+    contato: "",
   });
-  const [items, setItems] = useState<OrderItem[]>([]);
-  const [newItem, setNewItem] = useState<Partial<OrderItem>>({});
+  const [itens, setItens] = useState<ItemPedido[]>([]);
+  const [pedidos, setPedidos] = useState<Pedido[]>(mockPedidos);
+  const [orcamentos, setOrcamentos] = useState<Pedido[]>([]);
 
-  const handleCustomerInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCustomerInfo({
-      ...customerInfo,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleAddItem = () => {
-    if (!newItem.productCode || !newItem.description || !newItem.quantity || !newItem.unitPrice) {
-      toast({
-        title: "Error",
-        description: "Please fill all item fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setItems([
-      ...items,
-      {
-        id: Math.random().toString(),
-        productCode: newItem.productCode || "",
-        description: newItem.description || "",
-        quantity: Number(newItem.quantity),
-        discount: Number(newItem.discount || 0),
-        unitPrice: Number(newItem.unitPrice),
-      },
-    ]);
-    setNewItem({});
-  };
-
-  const handleSubmitOrder = () => {
-    if (!customerInfo.cnpj || !customerInfo.businessName || items.length === 0) {
-      toast({
-        title: "Error",
-        description: "Please fill all required fields and add at least one item",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Mock order submission
-    toast({
-      title: "Success",
-      description: "Order submitted successfully",
-    });
-
-    // Reset form
-    setCustomerInfo({
+  const limparFormulario = () => {
+    setDadosCliente({
       cnpj: "",
-      businessName: "",
-      address: "",
-      contact: "",
+      razaoSocial: "",
+      endereco: "",
+      contato: "",
     });
-    setItems([]);
+    setItens([]);
+  };
+
+  const salvarPedido = async (tipo: "pedido" | "orcamento") => {
+    if (!dadosCliente.cnpj || !dadosCliente.razaoSocial || itens.length === 0) {
+      toast({
+        title: "Erro ao salvar",
+        description: "Preencha todos os campos obrigatórios",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const novoPedido: Pedido = {
+      id: Math.random().toString(),
+      data: new Date().toISOString(),
+      clienteCNPJ: dadosCliente.cnpj,
+      clienteRazaoSocial: dadosCliente.razaoSocial,
+      clienteEndereco: dadosCliente.endereco,
+      clienteContato: dadosCliente.contato,
+      vendedorNome: user?.name || "Vendedor",
+      status: tipo === "pedido" ? "enviado" : "rascunho",
+      itens: [...itens],
+      total: itens.reduce(
+        (acc, item) =>
+          acc + item.quantidade * item.precoUnitario * (1 - item.desconto / 100),
+        0
+      ),
+    };
+
+    if (tipo === "pedido") {
+      setPedidos([...pedidos, novoPedido]);
+      toast({
+        title: "Pedido enviado",
+        description: "Pedido foi enviado com sucesso",
+      });
+    } else {
+      setOrcamentos([...orcamentos, novoPedido]);
+      toast({
+        title: "Orçamento salvo",
+        description: "Orçamento foi salvo com sucesso",
+      });
+    }
+
+    limparFormulario();
+    setActiveTab(tipo === "pedido" ? "pedidos" : "orcamentos");
+  };
+
+  const converterOrcamento = (orcamento: Pedido) => {
+    const pedidoConvertido: Pedido = {
+      ...orcamento,
+      status: "enviado",
+      data: new Date().toISOString(),
+    };
+
+    setPedidos([...pedidos, pedidoConvertido]);
+    setOrcamentos(orcamentos.filter((o) => o.id !== orcamento.id));
+
+    toast({
+      title: "Orçamento convertido",
+      description: "Orçamento foi convertido em pedido com sucesso",
+    });
   };
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">New Order</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Painel do Vendedor</h1>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">Welcome, {user?.name}</span>
+            <span className="text-sm text-gray-600">Olá, {user?.name}</span>
             <Button variant="outline" onClick={logout}>
-              Logout
+              Sair
             </Button>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">Customer Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">CNPJ</label>
-              <Input
-                name="cnpj"
-                value={customerInfo.cnpj}
-                onChange={handleCustomerInfoChange}
-                placeholder="Enter CNPJ"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Business Name</label>
-              <Input
-                name="businessName"
-                value={customerInfo.businessName}
-                onChange={handleCustomerInfoChange}
-                placeholder="Enter business name"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Address</label>
-              <Input
-                name="address"
-                value={customerInfo.address}
-                onChange={handleCustomerInfoChange}
-                placeholder="Enter address"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Contact</label>
-              <Input
-                name="contact"
-                value={customerInfo.contact}
-                onChange={handleCustomerInfoChange}
-                placeholder="Enter contact details"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">Order Items</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left p-2">Product Code</th>
-                  <th className="text-left p-2">Description</th>
-                  <th className="text-left p-2">Quantity</th>
-                  <th className="text-left p-2">Discount (%)</th>
-                  <th className="text-left p-2">Unit Price</th>
-                  <th className="text-left p-2">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item) => (
-                  <tr key={item.id} className="border-b">
-                    <td className="p-2">{item.productCode}</td>
-                    <td className="p-2">{item.description}</td>
-                    <td className="p-2">{item.quantity}</td>
-                    <td className="p-2">{item.discount}%</td>
-                    <td className="p-2">${item.unitPrice.toFixed(2)}</td>
-                    <td className="p-2">
-                      ${((item.quantity * item.unitPrice) * (1 - item.discount / 100)).toFixed(2)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-5 gap-4">
-            <Input
-              placeholder="Product Code"
-              value={newItem.productCode || ""}
-              onChange={(e) => setNewItem({ ...newItem, productCode: e.target.value })}
-            />
-            <Input
-              placeholder="Description"
-              value={newItem.description || ""}
-              onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
-            />
-            <Input
-              type="number"
-              placeholder="Quantity"
-              value={newItem.quantity || ""}
-              onChange={(e) => setNewItem({ ...newItem, quantity: Number(e.target.value) })}
-            />
-            <Input
-              type="number"
-              placeholder="Discount %"
-              value={newItem.discount || ""}
-              onChange={(e) => setNewItem({ ...newItem, discount: Number(e.target.value) })}
-            />
-            <Input
-              type="number"
-              placeholder="Unit Price"
-              value={newItem.unitPrice || ""}
-              onChange={(e) => setNewItem({ ...newItem, unitPrice: Number(e.target.value) })}
-            />
-          </div>
-          <Button onClick={handleAddItem} className="mt-4">
-            Add Item
+        <div className="flex gap-2 mb-4">
+          <Button
+            variant={activeTab === "novo" ? "default" : "outline"}
+            onClick={() => setActiveTab("novo")}
+          >
+            Novo Pedido
+          </Button>
+          <Button
+            variant={activeTab === "pedidos" ? "default" : "outline"}
+            onClick={() => setActiveTab("pedidos")}
+          >
+            Pedidos Enviados
+          </Button>
+          <Button
+            variant={activeTab === "orcamentos" ? "default" : "outline"}
+            onClick={() => setActiveTab("orcamentos")}
+          >
+            Orçamentos
           </Button>
         </div>
 
-        <Button onClick={handleSubmitOrder} className="w-full">
-          Submit Order
-        </Button>
+        <div className="bg-white rounded-lg shadow p-6">
+          {activeTab === "novo" ? (
+            <div className="space-y-6">
+              <FormularioCliente onDadosClienteChange={setDadosCliente} />
+              <TabelaItens itens={itens} onItensChange={setItens} />
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => salvarPedido("orcamento")}>
+                  Salvar como Orçamento
+                </Button>
+                <Button onClick={() => salvarPedido("pedido")}>
+                  Enviar Pedido
+                </Button>
+              </div>
+            </div>
+          ) : activeTab === "pedidos" ? (
+            <ListaPedidos
+              pedidos={pedidos}
+              tipo="pedidos"
+              onVerDetalhes={(pedido) => {
+                toast({
+                  title: "Detalhes do Pedido",
+                  description: `Pedido ${pedido.id} - ${pedido.clienteRazaoSocial}`,
+                });
+              }}
+            />
+          ) : (
+            <ListaPedidos
+              pedidos={orcamentos}
+              tipo="orcamentos"
+              onVerDetalhes={(pedido) => {
+                toast({
+                  title: "Detalhes do Orçamento",
+                  description: `Orçamento ${pedido.id} - ${pedido.clienteRazaoSocial}`,
+                });
+              }}
+              onConverterOrcamento={converterOrcamento}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
