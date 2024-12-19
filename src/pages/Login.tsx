@@ -19,11 +19,18 @@ const Login = () => {
       navigate("/");
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Invalid credentials. Please try again.",
+        title: "Erro",
+        description: "Credenciais inválidas. Por favor, tente novamente.",
         variant: "destructive",
       });
     }
+  };
+
+  const handleForgotPassword = () => {
+    toast({
+      title: "Redefinição de senha",
+      description: "Por favor, entre em contato com o administrador do sistema para redefinir sua senha.",
+    });
   };
 
   return (
@@ -31,17 +38,17 @@ const Login = () => {
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-lg">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
+            Acesse sua conta
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Enter your credentials to access the system
+            Digite suas credenciais para acessar o sistema
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
+                E-mail
               </label>
               <Input
                 id="email"
@@ -50,12 +57,12 @@ const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="mt-1"
-                placeholder="Enter your email"
+                placeholder="Digite seu e-mail"
               />
             </div>
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
+                Senha
               </label>
               <Input
                 id="password"
@@ -64,18 +71,27 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 className="mt-1"
-                placeholder="Enter your password"
+                placeholder="Digite sua senha"
               />
             </div>
           </div>
+          <div className="flex items-center justify-end">
+            <button
+              type="button"
+              onClick={handleForgotPassword}
+              className="text-sm text-blue-600 hover:text-blue-500"
+            >
+              Esqueceu sua senha?
+            </button>
+          </div>
           <Button type="submit" className="w-full">
-            Sign in
+            Entrar
           </Button>
         </form>
         <div className="mt-4 text-center text-sm text-gray-600">
-          <p>Demo credentials:</p>
-          <p>Vendor: vendor@test.com / vendor</p>
-          <p>Admin: admin@test.com / admin</p>
+          <p>Credenciais de demonstração:</p>
+          <p>Vendedor: vendor@test.com / vendor</p>
+          <p>Administrador: admin@test.com / admin</p>
         </div>
       </div>
     </div>
