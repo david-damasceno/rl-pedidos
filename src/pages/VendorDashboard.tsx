@@ -11,8 +11,9 @@ import {
   FileText, 
   ClipboardList, 
   PlusCircle,
-  Send  // Add this import
+  Send  
 } from "lucide-react";
+import { DatabaseService } from "@/services/database"; // Import the DatabaseService
 
 const mockPedidos: Pedido[] = [
   {
@@ -63,39 +64,49 @@ const VendorDashboard = () => {
       return;
     }
 
-    const novoPedido: Pedido = {
-      id: Math.random().toString(),
-      data: new Date().toISOString(),
-      clienteCNPJ: dadosCliente.cnpj,
-      clienteRazaoSocial: dadosCliente.razaoSocial,
-      clienteEndereco: dadosCliente.endereco,
-      clienteContato: dadosCliente.contato,
-      vendedorNome: user?.name || "Vendedor",
-      status: tipo === "pedido" ? "enviado" : "rascunho",
-      itens: [...itens],
-      total: itens.reduce(
+    try {
+      const total = itens.reduce(
         (acc, item) =>
           acc + item.quantidade * item.precoUnitario * (1 - item.desconto / 100),
         0
-      ),
-    };
+      );
 
-    if (tipo === "pedido") {
-      setPedidos([...pedidos, novoPedido]);
-      toast({
-        title: "Pedido enviado",
-        description: "Pedido foi enviado com sucesso",
+      const novoPedido = await DatabaseService.createPedido({
+        data: new Date().toISOString(),
+        clienteCNPJ: dadosCliente.cnpj,
+        clienteRazaoSocial: dadosCliente.razaoSocial,
+        clienteEndereco: dadosCliente.endereco,
+        clienteContato: dadosCliente.contato,
+        vendedorNome: user?.name || "Vendedor",
+        status: tipo === "pedido" ? "enviado" : "rascunho",
+        itens: [...itens],
+        total,
       });
-    } else {
-      setOrcamentos([...orcamentos, novoPedido]);
+
+      if (tipo === "pedido") {
+        setPedidos([...pedidos, novoPedido]);
+        toast({
+          title: "Pedido enviado",
+          description: "Pedido foi enviado com sucesso",
+        });
+      } else {
+        setOrcamentos([...orcamentos, novoPedido]);
+        toast({
+          title: "Orçamento salvo",
+          description: "Orçamento foi salvo com sucesso",
+        });
+      }
+
+      limparFormulario();
+      setActiveTab(tipo === "pedido" ? "pedidos" : "orcamentos");
+    } catch (error) {
+      console.error('Erro ao salvar pedido:', error);
       toast({
-        title: "Orçamento salvo",
-        description: "Orçamento foi salvo com sucesso",
+        title: "Erro ao salvar",
+        description: "Ocorreu um erro ao salvar o pedido",
+        variant: "destructive",
       });
     }
-
-    limparFormulario();
-    setActiveTab(tipo === "pedido" ? "pedidos" : "orcamentos");
   };
 
   return (
@@ -194,4 +205,3 @@ const VendorDashboard = () => {
 };
 
 export default VendorDashboard;
-
