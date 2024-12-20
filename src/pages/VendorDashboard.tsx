@@ -7,7 +7,6 @@ import { TabelaItens } from "@/components/pedidos/TabelaItens";
 import { ListaPedidos } from "@/components/pedidos/ListaPedidos";
 import { Pedido, ItemPedido } from "@/types/pedido";
 
-// Dados mockados para exemplo
 const mockPedidos: Pedido[] = [
   {
     id: "1",
@@ -92,22 +91,6 @@ const VendorDashboard = () => {
     setActiveTab(tipo === "pedido" ? "pedidos" : "orcamentos");
   };
 
-  const converterOrcamento = (orcamento: Pedido) => {
-    const pedidoConvertido: Pedido = {
-      ...orcamento,
-      status: "enviado",
-      data: new Date().toISOString(),
-    };
-
-    setPedidos([...pedidos, pedidoConvertido]);
-    setOrcamentos(orcamentos.filter((o) => o.id !== orcamento.id));
-
-    toast({
-      title: "Orçamento convertido",
-      description: "Orçamento foi convertido em pedido com sucesso",
-    });
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-6xl mx-auto">
@@ -121,37 +104,47 @@ const VendorDashboard = () => {
           </div>
         </div>
 
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-2 mb-4 overflow-x-auto">
           <Button
             variant={activeTab === "novo" ? "default" : "outline"}
             onClick={() => setActiveTab("novo")}
+            className="whitespace-nowrap"
           >
             Novo Pedido
           </Button>
           <Button
             variant={activeTab === "pedidos" ? "default" : "outline"}
             onClick={() => setActiveTab("pedidos")}
+            className="whitespace-nowrap"
           >
             Pedidos Enviados
           </Button>
           <Button
             variant={activeTab === "orcamentos" ? "default" : "outline"}
             onClick={() => setActiveTab("orcamentos")}
+            className="whitespace-nowrap"
           >
             Orçamentos
           </Button>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-4 md:p-6">
           {activeTab === "novo" ? (
             <div className="space-y-6">
               <FormularioCliente onDadosClienteChange={setDadosCliente} />
               <TabelaItens itens={itens} onItensChange={setItens} />
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => salvarPedido("orcamento")}>
+              <div className="flex flex-col sm:flex-row justify-end gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => salvarPedido("orcamento")}
+                  className="w-full sm:w-auto"
+                >
                   Salvar como Orçamento
                 </Button>
-                <Button onClick={() => salvarPedido("pedido")}>
+                <Button 
+                  onClick={() => salvarPedido("pedido")}
+                  className="w-full sm:w-auto"
+                >
                   Enviar Pedido
                 </Button>
               </div>
@@ -177,7 +170,6 @@ const VendorDashboard = () => {
                   description: `Orçamento ${pedido.id} - ${pedido.clienteRazaoSocial}`,
                 });
               }}
-              onConverterOrcamento={converterOrcamento}
             />
           )}
         </div>

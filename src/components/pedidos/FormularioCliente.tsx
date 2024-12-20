@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { Search } from "lucide-react";
 
 interface FormularioClienteProps {
   onDadosClienteChange: (dados: {
@@ -18,7 +20,16 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
   const [endereco, setEndereco] = useState("");
   const [contato, setContato] = useState("");
 
-  const consultarCNPJ = async (cnpj: string) => {
+  const consultarCNPJ = async () => {
+    if (cnpj.length !== 14) {
+      toast({
+        title: "CNPJ Inválido",
+        description: "Por favor, digite um CNPJ válido com 14 dígitos",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       // Simulação da consulta ao Sintegra
       // TODO: Implementar integração real com API do Sintegra
@@ -61,17 +72,27 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium mb-1">CNPJ</label>
-          <Input
-            value={cnpj}
-            onChange={(e) => {
-              setCnpj(e.target.value);
-              if (e.target.value.length === 14) {
-                consultarCNPJ(e.target.value);
-              }
-            }}
-            placeholder="Digite o CNPJ"
-            maxLength={14}
-          />
+          <div className="flex gap-2">
+            <Input
+              value={cnpj}
+              onChange={(e) => {
+                setCnpj(e.target.value);
+                onDadosClienteChange({ cnpj: e.target.value, razaoSocial, endereco, contato });
+              }}
+              placeholder="Digite o CNPJ"
+              maxLength={14}
+              className="flex-1"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={consultarCNPJ}
+              className="shrink-0"
+            >
+              <Search className="h-4 w-4 mr-2" />
+              Buscar
+            </Button>
+          </div>
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Razão Social</label>
