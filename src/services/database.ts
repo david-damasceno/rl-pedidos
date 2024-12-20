@@ -1,60 +1,20 @@
-import prisma from '@/lib/prisma';
-import { Pedido, ItemPedido } from '@/types/pedido';
+import { api } from './api';
+import { Pedido } from '@/types/pedido';
 
 export const DatabaseService = {
-  // Pedidos
-  async createPedido(pedido: Omit<Pedido, 'id'>) {
-    return await prisma.pedido.create({
-      data: {
-        clienteCNPJ: pedido.clienteCNPJ,
-        clienteRazaoSocial: pedido.clienteRazaoSocial,
-        clienteEndereco: pedido.clienteEndereco || '',
-        clienteContato: pedido.clienteContato || '',
-        status: pedido.status,
-        vendedorId: 1, // Temporário: deve vir do contexto de autenticação
-        total: pedido.total,
-        itens: {
-          create: pedido.itens.map(item => ({
-            produtoCodigo: item.produtoCodigo,
-            descricao: item.descricao,
-            quantidade: item.quantidade,
-            desconto: item.desconto,
-            precoUnitario: item.precoUnitario,
-          }))
-        }
-      },
-      include: {
-        itens: true,
-        vendedor: true,
-      }
-    });
+  createPedido: async (pedido: Omit<Pedido, 'id'>) => {
+    return await api.createPedido(pedido);
   },
 
-  async getPedidos() {
-    return await prisma.pedido.findMany({
-      include: {
-        itens: true,
-        vendedor: true,
-      }
-    });
+  getPedidos: async () => {
+    return await api.getPedidos();
   },
 
-  async getPedidosByVendedor(vendedorId: number) {
-    return await prisma.pedido.findMany({
-      where: {
-        vendedorId
-      },
-      include: {
-        itens: true,
-        vendedor: true,
-      }
-    });
+  getPedidosByVendedor: async (vendedorId: number) => {
+    return await api.getPedidosByVendedor(vendedorId);
   },
 
-  async updatePedidoStatus(id: number, status: string) {
-    return await prisma.pedido.update({
-      where: { id },
-      data: { status }
-    });
+  updatePedidoStatus: async (id: number, status: string) => {
+    return await api.updatePedidoStatus(id, status);
   }
 };
