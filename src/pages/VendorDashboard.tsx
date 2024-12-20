@@ -6,6 +6,7 @@ import { FormularioCliente } from "@/components/pedidos/FormularioCliente";
 import { TabelaItens } from "@/components/pedidos/TabelaItens";
 import { ListaPedidos } from "@/components/pedidos/ListaPedidos";
 import { Pedido, ItemPedido } from "@/types/pedido";
+import { LogOut, FileText, ClipboardList, PlusCircle } from "lucide-react";
 
 const mockPedidos: Pedido[] = [
   {
@@ -92,60 +93,68 @@ const VendorDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-gray-50 p-2 sm:p-4">
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Painel do Vendedor</h1>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">Olá, {user?.name}</span>
-            <Button variant="outline" onClick={logout}>
-              Sair
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Painel do Vendedor</h1>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600 hidden sm:inline">Olá, {user?.name}</span>
+            <Button variant="outline" onClick={logout} size="icon" title="Sair">
+              <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </div>
 
-        <div className="flex gap-2 mb-4 overflow-x-auto">
+        <div className="flex gap-1 sm:gap-2 mb-4 overflow-x-auto">
           <Button
             variant={activeTab === "novo" ? "default" : "outline"}
             onClick={() => setActiveTab("novo")}
-            className="whitespace-nowrap"
+            className="flex-1 sm:flex-none"
+            title="Novo Pedido"
           >
-            Novo Pedido
+            <PlusCircle className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Novo Pedido</span>
           </Button>
           <Button
             variant={activeTab === "pedidos" ? "default" : "outline"}
             onClick={() => setActiveTab("pedidos")}
-            className="whitespace-nowrap"
+            className="flex-1 sm:flex-none"
+            title="Pedidos Enviados"
           >
-            Pedidos Enviados
+            <ClipboardList className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Pedidos</span>
           </Button>
           <Button
             variant={activeTab === "orcamentos" ? "default" : "outline"}
             onClick={() => setActiveTab("orcamentos")}
-            className="whitespace-nowrap"
+            className="flex-1 sm:flex-none"
+            title="Orçamentos"
           >
-            Orçamentos
+            <FileText className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Orçamentos</span>
           </Button>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-4 md:p-6">
+        <div className="bg-white rounded-lg shadow">
           {activeTab === "novo" ? (
             <div className="space-y-6">
               <FormularioCliente onDadosClienteChange={setDadosCliente} />
               <TabelaItens itens={itens} onItensChange={setItens} />
-              <div className="flex flex-col sm:flex-row justify-end gap-2">
+              <div className="flex flex-col sm:flex-row justify-end gap-2 p-4">
                 <Button 
                   variant="outline" 
                   onClick={() => salvarPedido("orcamento")}
                   className="w-full sm:w-auto"
                 >
-                  Salvar como Orçamento
+                  <FileText className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Salvar Orçamento</span>
                 </Button>
                 <Button 
                   onClick={() => salvarPedido("pedido")}
                   className="w-full sm:w-auto"
                 >
-                  Enviar Pedido
+                  <Send className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Enviar Pedido</span>
                 </Button>
               </div>
             </div>

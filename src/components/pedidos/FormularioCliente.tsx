@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Search } from "lucide-react";
+import { Search, Save, Send } from "lucide-react";
 
 interface FormularioClienteProps {
   onDadosClienteChange: (dados: {
@@ -20,8 +20,34 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
   const [endereco, setEndereco] = useState("");
   const [contato, setContato] = useState("");
 
+  const formatCNPJ = (value: string) => {
+    // Remove tudo que não é número
+    const numbers = value.replace(/\D/g, "");
+    
+    // Aplica a máscara do CNPJ: XX.XXX.XXX/XXXX-XX
+    return numbers.replace(
+      /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2}).*/, 
+      "$1.$2.$3/$4-$5"
+    );
+  };
+
+  const handleCNPJChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value.replace(/\D/g, "");
+    if (rawValue.length <= 14) {
+      const formattedValue = formatCNPJ(rawValue);
+      setCnpj(formattedValue);
+      onDadosClienteChange({ 
+        cnpj: formattedValue, 
+        razaoSocial, 
+        endereco, 
+        contato 
+      });
+    }
+  };
+
   const consultarCNPJ = async () => {
-    if (cnpj.length !== 14) {
+    const numerosCNPJ = cnpj.replace(/\D/g, "");
+    if (numerosCNPJ.length !== 14) {
       toast({
         title: "CNPJ Inválido",
         description: "Por favor, digite um CNPJ válido com 14 dígitos",
@@ -67,30 +93,26 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-2">
       <h2 className="text-lg font-semibold">Dados do Cliente</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         <div>
           <label className="block text-sm font-medium mb-1">CNPJ</label>
           <div className="flex gap-2">
             <Input
               value={cnpj}
-              onChange={(e) => {
-                setCnpj(e.target.value);
-                onDadosClienteChange({ cnpj: e.target.value, razaoSocial, endereco, contato });
-              }}
+              onChange={handleCNPJChange}
               placeholder="Digite o CNPJ"
-              maxLength={14}
               className="flex-1"
             />
             <Button
               type="button"
               variant="outline"
               onClick={consultarCNPJ}
-              className="shrink-0"
+              className="shrink-0 w-10 px-0"
+              title="Buscar CNPJ"
             >
-              <Search className="h-4 w-4 mr-2" />
-              Buscar
+              <Search className="h-4 w-4" />
             </Button>
           </div>
         </div>
