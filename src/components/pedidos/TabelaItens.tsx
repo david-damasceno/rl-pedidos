@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ItemPedido } from "@/types/pedido";
 import { useState } from "react";
+import { Plus } from "lucide-react";
 
 interface TabelaItensProps {
   itens: ItemPedido[];
@@ -39,20 +40,80 @@ export const TabelaItens = ({ itens, onItensChange }: TabelaItensProps) => {
     );
   };
 
+  const calcularTotalGeral = () => {
+    return itens.reduce((total, item) => total + calcularTotal(item), 0);
+  };
+
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold">Itens do Pedido</h2>
+      <div className="grid grid-cols-1 gap-4 mb-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <Input
+            value={novoItem.produtoCodigo || ""}
+            onChange={(e) =>
+              setNovoItem({ ...novoItem, produtoCodigo: e.target.value })
+            }
+            placeholder="Código"
+            className="w-full"
+          />
+          <Input
+            value={novoItem.descricao || ""}
+            onChange={(e) =>
+              setNovoItem({ ...novoItem, descricao: e.target.value })
+            }
+            placeholder="Descrição"
+            className="w-full sm:col-span-2"
+          />
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          <Input
+            type="number"
+            value={novoItem.quantidade || ""}
+            onChange={(e) =>
+              setNovoItem({ ...novoItem, quantidade: Number(e.target.value) })
+            }
+            placeholder="Qtd"
+            className="w-full"
+          />
+          <Input
+            type="number"
+            value={novoItem.desconto || ""}
+            onChange={(e) =>
+              setNovoItem({ ...novoItem, desconto: Number(e.target.value) })
+            }
+            placeholder="Desconto %"
+            className="w-full"
+          />
+          <Input
+            type="number"
+            value={novoItem.precoUnitario || ""}
+            onChange={(e) =>
+              setNovoItem({ ...novoItem, precoUnitario: Number(e.target.value) })
+            }
+            placeholder="Preço Unit."
+            className="w-full"
+          />
+        </div>
+        <Button 
+          onClick={adicionarItem}
+          className="w-full sm:w-auto"
+          size="icon"
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      </div>
+
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b">
               <th className="text-left p-2">Código</th>
               <th className="text-left p-2">Descrição</th>
-              <th className="text-left p-2">Qtd</th>
-              <th className="text-left p-2">Desconto %</th>
-              <th className="text-left p-2">Preço Unit.</th>
-              <th className="text-left p-2">Total</th>
-              <th className="text-left p-2">Ações</th>
+              <th className="text-right p-2">Qtd</th>
+              <th className="text-right p-2">Desc%</th>
+              <th className="text-right p-2">Preço</th>
+              <th className="text-center p-2">Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -60,76 +121,31 @@ export const TabelaItens = ({ itens, onItensChange }: TabelaItensProps) => {
               <tr key={item.id} className="border-b">
                 <td className="p-2">{item.produtoCodigo}</td>
                 <td className="p-2">{item.descricao}</td>
-                <td className="p-2">{item.quantidade}</td>
-                <td className="p-2">{item.desconto}%</td>
-                <td className="p-2">R$ {item.precoUnitario.toFixed(2)}</td>
-                <td className="p-2">R$ {calcularTotal(item).toFixed(2)}</td>
-                <td className="p-2">
+                <td className="p-2 text-right">{item.quantidade}</td>
+                <td className="p-2 text-right">{item.desconto}%</td>
+                <td className="p-2 text-right">
+                  R$ {item.precoUnitario.toFixed(2)}
+                </td>
+                <td className="p-2 text-center">
                   <Button
                     variant="destructive"
-                    size="sm"
+                    size="icon"
                     onClick={() => removerItem(item.id)}
                   >
-                    Remover
+                    <span className="sr-only">Remover</span>
+                    ×
                   </Button>
                 </td>
               </tr>
             ))}
-            <tr>
-              <td className="p-2">
-                <Input
-                  value={novoItem.produtoCodigo || ""}
-                  onChange={(e) =>
-                    setNovoItem({ ...novoItem, produtoCodigo: e.target.value })
-                  }
-                  placeholder="Código"
-                />
-              </td>
-              <td className="p-2">
-                <Input
-                  value={novoItem.descricao || ""}
-                  onChange={(e) =>
-                    setNovoItem({ ...novoItem, descricao: e.target.value })
-                  }
-                  placeholder="Descrição"
-                />
-              </td>
-              <td className="p-2">
-                <Input
-                  type="number"
-                  value={novoItem.quantidade || ""}
-                  onChange={(e) =>
-                    setNovoItem({ ...novoItem, quantidade: Number(e.target.value) })
-                  }
-                  placeholder="Qtd"
-                />
-              </td>
-              <td className="p-2">
-                <Input
-                  type="number"
-                  value={novoItem.desconto || ""}
-                  onChange={(e) =>
-                    setNovoItem({ ...novoItem, desconto: Number(e.target.value) })
-                  }
-                  placeholder="Desconto"
-                />
-              </td>
-              <td className="p-2">
-                <Input
-                  type="number"
-                  value={novoItem.precoUnitario || ""}
-                  onChange={(e) =>
-                    setNovoItem({ ...novoItem, precoUnitario: Number(e.target.value) })
-                  }
-                  placeholder="Preço"
-                />
-              </td>
-              <td className="p-2">
-                <Button onClick={adicionarItem}>Adicionar</Button>
-              </td>
-            </tr>
           </tbody>
         </table>
+      </div>
+
+      <div className="flex justify-end mt-4">
+        <div className="text-lg font-semibold">
+          Total: R$ {calcularTotalGeral().toFixed(2)}
+        </div>
       </div>
     </div>
   );
