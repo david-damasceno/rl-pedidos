@@ -45,7 +45,7 @@ export const TabelaItens = ({ itens, onItensChange }: TabelaItensProps) => {
   };
 
   return (
-    <div className="space-y-4 px-4 py-2">
+    <div className="space-y-2 px-2 py-2">
       <h2 className="text-lg font-semibold">Itens do Pedido</h2>
       <div className="grid grid-cols-1 gap-4 mb-4">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
