@@ -6,7 +6,13 @@ import { FormularioCliente } from "@/components/pedidos/FormularioCliente";
 import { TabelaItens } from "@/components/pedidos/TabelaItens";
 import { ListaPedidos } from "@/components/pedidos/ListaPedidos";
 import { Pedido, ItemPedido } from "@/types/pedido";
-import { LogOut, FileText, ClipboardList, PlusCircle } from "lucide-react";
+import { 
+  LogOut, 
+  FileText, 
+  ClipboardList, 
+  PlusCircle,
+  Send  // Add this import
+} from "lucide-react";
 
 const mockPedidos: Pedido[] = [
   {
@@ -188,3 +194,4 @@ const VendorDashboard = () => {
 };
 
 export default VendorDashboard;
+
