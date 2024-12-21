@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Plus, X } from "lucide-react";
+import { Search } from "lucide-react";
+import { CNPJList } from "./CNPJList";
 
 interface FormularioClienteProps {
   onDadosClienteChange: (dados: {
@@ -22,7 +23,6 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
   const [endereco, setEndereco] = useState("");
   const [contato, setContato] = useState("");
   const [fornecedor, setFornecedor] = useState("");
-  const [cnpjAdicional, setCnpjAdicional] = useState("");
   const [cnpjsAdicionais, setCnpjsAdicionais] = useState<string[]>([]);
 
   const formatCNPJ = (value: string) => {
@@ -49,38 +49,29 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
     }
   };
 
-  const handleAddCNPJ = () => {
-    if (cnpjAdicional.length === 18) {
-      if (cnpjsAdicionais.includes(cnpjAdicional)) {
-        toast({
-          title: "CNPJ Duplicado",
-          description: "Este CNPJ já foi adicionado",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      setCnpjsAdicionais([...cnpjsAdicionais, cnpjAdicional]);
-      setCnpjAdicional("");
-      onDadosClienteChange({
-        cnpj,
-        razaoSocial,
-        endereco,
-        contato,
-        fornecedor,
-        cnpjsAdicionais: [...cnpjsAdicionais, cnpjAdicional],
-      });
+  const handleAddCNPJ = (novoCnpj: string) => {
+    if (cnpjsAdicionais.includes(novoCnpj)) {
       toast({
-        title: "CNPJ Adicional",
-        description: "CNPJ adicional incluído com sucesso",
-      });
-    } else {
-      toast({
-        title: "CNPJ Inválido",
-        description: "Por favor, digite um CNPJ válido",
+        title: "CNPJ Duplicado",
+        description: "Este CNPJ já foi adicionado",
         variant: "destructive",
       });
+      return;
     }
+    
+    setCnpjsAdicionais([...cnpjsAdicionais, novoCnpj]);
+    onDadosClienteChange({
+      cnpj,
+      razaoSocial,
+      endereco,
+      contato,
+      fornecedor,
+      cnpjsAdicionais: [...cnpjsAdicionais, novoCnpj],
+    });
+    toast({
+      title: "CNPJ Adicional",
+      description: "CNPJ adicional incluído com sucesso",
+    });
   };
 
   const handleRemoveCNPJ = (cnpjToRemove: string) => {
@@ -244,48 +235,11 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
           />
         </div>
         
-        {/* CNPJs Adicionais */}
-        <div className="space-y-4">
-          <label className="block text-sm font-medium">CNPJs Adicionais</label>
-          <div className="flex gap-2">
-            <Input
-              value={cnpjAdicional}
-              onChange={(e) => {
-                const formattedValue = formatCNPJ(e.target.value.replace(/\D/g, ""));
-                setCnpjAdicional(formattedValue);
-              }}
-              placeholder="Digite CNPJ adicional"
-              className="flex-1"
-            />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleAddCNPJ}
-              className="shrink-0 w-10 px-0"
-              title="Adicionar CNPJ"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-          {cnpjsAdicionais.length > 0 && (
-            <div className="mt-2 space-y-2">
-              {cnpjsAdicionais.map((cnpjAdicional, index) => (
-                <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-md">
-                  <span className="text-sm text-gray-600">{cnpjAdicional}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleRemoveCNPJ(cnpjAdicional)}
-                    className="h-8 w-8 p-0"
-                  >
-                    <X className="h-4 w-4 text-gray-500 hover:text-red-500" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <CNPJList
+          cnpjsAdicionais={cnpjsAdicionais}
+          onAddCNPJ={handleAddCNPJ}
+          onRemoveCNPJ={handleRemoveCNPJ}
+        />
       </div>
     </div>
   );
