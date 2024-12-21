@@ -2,6 +2,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface Order {
   id: string;
@@ -10,6 +16,16 @@ interface Order {
   vendorName: string;
   status: "pendente" | "processado" | "encaminhado";
   total: number;
+  clienteCNPJ?: string;
+  clienteEndereco?: string;
+  clienteContato?: string;
+  itens?: Array<{
+    produtoCodigo: string;
+    descricao: string;
+    quantidade: number;
+    precoUnitario: number;
+    desconto: number;
+  }>;
 }
 
 const mockOrders: Order[] = [
@@ -20,6 +36,18 @@ const mockOrders: Order[] = [
     vendorName: "João Silva",
     status: "pendente",
     total: 1500.00,
+    clienteCNPJ: "12.345.678/0001-90",
+    clienteEndereco: "Rua das Tecnologias, 123",
+    clienteContato: "contato@techsolutions.com",
+    itens: [
+      {
+        produtoCodigo: "TECH001",
+        descricao: "Notebook Dell",
+        quantidade: 2,
+        precoUnitario: 750.00,
+        desconto: 0
+      }
+    ]
   },
   {
     id: "2",
@@ -28,6 +56,18 @@ const mockOrders: Order[] = [
     vendorName: "Maria Santos",
     status: "processado",
     total: 2300.50,
+    clienteCNPJ: "98.765.432/0001-10",
+    clienteEndereco: "Av. Digital, 456",
+    clienteContato: "contato@digitalsystems.com",
+    itens: [
+      {
+        produtoCodigo: "DIG001",
+        descricao: "Servidor HP",
+        quantidade: 1,
+        precoUnitario: 2300.50,
+        desconto: 0
+      }
+    ]
   },
 ];
 
@@ -35,6 +75,8 @@ const AdminDashboard = () => {
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const [orders, setOrders] = useState<Order[]>(mockOrders);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   const handleStatusUpdate = (orderId: string, newStatus: Order["status"]) => {
     setOrders(orders.map(order => 
@@ -45,6 +87,11 @@ const AdminDashboard = () => {
       title: "Status Atualizado",
       description: `Pedido ${orderId} foi marcado como ${newStatus}`,
     });
+  };
+
+  const handleViewDetails = (order: Order) => {
+    setSelectedOrder(order);
+    setIsDetailsOpen(true);
   };
 
   const getStatusColor = (status: Order["status"]) => {
@@ -129,9 +176,15 @@ const AdminDashboard = () => {
                         <Button
                           size="sm"
                           variant="outline"
+                          onClick={() => handleViewDetails(order)}
+                        >
+                          Detalhes
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
                           onClick={() => handleStatusUpdate(order.id, "processado")}
                           disabled={order.status !== "pendente"}
-                          className="whitespace-nowrap"
                         >
                           Processar
                         </Button>
@@ -140,7 +193,6 @@ const AdminDashboard = () => {
                           variant="outline"
                           onClick={() => handleStatusUpdate(order.id, "encaminhado")}
                           disabled={order.status !== "processado"}
-                          className="whitespace-nowrap"
                         >
                           Encaminhar
                         </Button>
@@ -153,6 +205,62 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
+
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Detalhes do Pedido #{selectedOrder?.id}</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <h3 className="font-semibold mb-2">Informações do Cliente</h3>
+                <p><span className="font-medium">CNPJ:</span> {selectedOrder?.clienteCNPJ}</p>
+                <p><span className="font-medium">Nome:</span> {selectedOrder?.customerName}</p>
+                <p><span className="font-medium">Endereço:</span> {selectedOrder?.clienteEndereco}</p>
+                <p><span className="font-medium">Contato:</span> {selectedOrder?.clienteContato}</p>
+              </div>
+              <div>
+                <h3 className="font-semibold mb-2">Informações do Pedido</h3>
+                <p><span className="font-medium">Data:</span> {selectedOrder?.date}</p>
+                <p><span className="font-medium">Vendedor:</span> {selectedOrder?.vendorName}</p>
+                <p><span className="font-medium">Status:</span> {selectedOrder?.status}</p>
+                <p><span className="font-medium">Total:</span> R$ {selectedOrder?.total.toFixed(2)}</p>
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold mb-2">Itens do Pedido</h3>
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-2">Código</th>
+                    <th className="text-left py-2">Descrição</th>
+                    <th className="text-right py-2">Qtd</th>
+                    <th className="text-right py-2">Preço Unit.</th>
+                    <th className="text-right py-2">Desconto</th>
+                    <th className="text-right py-2">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedOrder?.itens?.map((item, index) => (
+                    <tr key={index} className="border-b">
+                      <td className="py-2">{item.produtoCodigo}</td>
+                      <td className="py-2">{item.descricao}</td>
+                      <td className="text-right py-2">{item.quantidade}</td>
+                      <td className="text-right py-2">R$ {item.precoUnitario.toFixed(2)}</td>
+                      <td className="text-right py-2">{item.desconto}%</td>
+                      <td className="text-right py-2">
+                        R$ {(item.quantidade * item.precoUnitario * (1 - item.desconto / 100)).toFixed(2)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
