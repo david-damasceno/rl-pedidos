@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, X } from "lucide-react";
 
 interface FormularioClienteProps {
   onDadosClienteChange: (dados: {
@@ -50,9 +50,26 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
   };
 
   const handleAddCNPJ = () => {
-    if (cnpjAdicional.length === 18) { // CNPJ formatado tem 18 caracteres
+    if (cnpjAdicional.length === 18) {
+      if (cnpjsAdicionais.includes(cnpjAdicional)) {
+        toast({
+          title: "CNPJ Duplicado",
+          description: "Este CNPJ já foi adicionado",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       setCnpjsAdicionais([...cnpjsAdicionais, cnpjAdicional]);
       setCnpjAdicional("");
+      onDadosClienteChange({
+        cnpj,
+        razaoSocial,
+        endereco,
+        contato,
+        fornecedor,
+        cnpjsAdicionais: [...cnpjsAdicionais, cnpjAdicional],
+      });
       toast({
         title: "CNPJ Adicional",
         description: "CNPJ adicional incluído com sucesso",
@@ -64,6 +81,23 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
         variant: "destructive",
       });
     }
+  };
+
+  const handleRemoveCNPJ = (cnpjToRemove: string) => {
+    const newCnpjs = cnpjsAdicionais.filter(c => c !== cnpjToRemove);
+    setCnpjsAdicionais(newCnpjs);
+    onDadosClienteChange({
+      cnpj,
+      razaoSocial,
+      endereco,
+      contato,
+      fornecedor,
+      cnpjsAdicionais: newCnpjs,
+    });
+    toast({
+      title: "CNPJ Removido",
+      description: "CNPJ adicional removido com sucesso",
+    });
   };
 
   const consultarCNPJ = async () => {
@@ -78,8 +112,6 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
     }
 
     try {
-      // Simulação da consulta ao Sintegra
-      // TODO: Implementar integração real com API do Sintegra
       const response = await new Promise((resolve) => {
         setTimeout(() => {
           resolve({
@@ -116,11 +148,11 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
   };
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-6 p-6">
       <h2 className="text-lg font-semibold">Dados do Pedido</h2>
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-6">
         <div>
-          <label className="block text-sm font-medium mb-1">Fornecedor</label>
+          <label className="block text-sm font-medium mb-2">Fornecedor</label>
           <Input
             value={fornecedor}
             onChange={(e) => {
@@ -138,7 +170,7 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">CNPJ</label>
+          <label className="block text-sm font-medium mb-2">CNPJ</label>
           <div className="flex gap-2">
             <Input
               value={cnpj}
@@ -158,7 +190,7 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Razão Social</label>
+          <label className="block text-sm font-medium mb-2">Razão Social</label>
           <Input
             value={razaoSocial}
             onChange={(e) => {
@@ -176,7 +208,7 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Endereço</label>
+          <label className="block text-sm font-medium mb-2">Endereço</label>
           <Input
             value={endereco}
             onChange={(e) => {
@@ -194,7 +226,7 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Contato</label>
+          <label className="block text-sm font-medium mb-2">Contato</label>
           <Input
             value={contato}
             onChange={(e) => {
@@ -213,8 +245,8 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
         </div>
         
         {/* CNPJs Adicionais */}
-        <div className="mt-4">
-          <label className="block text-sm font-medium mb-1">CNPJs Adicionais</label>
+        <div className="space-y-4">
+          <label className="block text-sm font-medium">CNPJs Adicionais</label>
           <div className="flex gap-2">
             <Input
               value={cnpjAdicional}
@@ -236,10 +268,19 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
             </Button>
           </div>
           {cnpjsAdicionais.length > 0 && (
-            <div className="mt-2 space-y-1">
+            <div className="mt-2 space-y-2">
               {cnpjsAdicionais.map((cnpjAdicional, index) => (
-                <div key={index} className="text-sm text-gray-600">
-                  {cnpjAdicional}
+                <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-md">
+                  <span className="text-sm text-gray-600">{cnpjAdicional}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleRemoveCNPJ(cnpjAdicional)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <X className="h-4 w-4 text-gray-500 hover:text-red-500" />
+                  </Button>
                 </div>
               ))}
             </div>
