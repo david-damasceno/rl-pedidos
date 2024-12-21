@@ -163,15 +163,13 @@ const VendorDashboard = () => {
                   onClick={() => salvarPedido("orcamento")}
                   className="w-full sm:w-auto"
                 >
-                  <FileText className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Salvar Orçamento</span>
+                  Salvar Orçamento
                 </Button>
                 <Button 
                   onClick={() => salvarPedido("pedido")}
                   className="w-full sm:w-auto"
                 >
-                  <Send className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Enviar Pedido</span>
+                  Enviar Pedido
                 </Button>
               </div>
             </div>
