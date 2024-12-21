@@ -2,9 +2,15 @@ import { Pedido } from '@/types/pedido';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
+// Remove trailing slash and colon from URL if present
+const normalizeUrl = (url: string) => {
+  return url.replace(/[:\/]$/, '');
+};
+
 export const api = {
   async createPedido(pedidoData: Omit<Pedido, 'id'>) {
-    const response = await fetch(`${API_BASE_URL}/api/pedidos`, {
+    const baseUrl = normalizeUrl(API_BASE_URL);
+    const response = await fetch(`${baseUrl}/api/pedidos`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -20,7 +26,8 @@ export const api = {
   },
 
   async getPedidos() {
-    const response = await fetch(`${API_BASE_URL}/api/pedidos`);
+    const baseUrl = normalizeUrl(API_BASE_URL);
+    const response = await fetch(`${baseUrl}/api/pedidos`);
     
     if (!response.ok) {
       throw new Error('Failed to fetch pedidos');
@@ -30,7 +37,8 @@ export const api = {
   },
 
   async getPedidosByVendedor(vendedorId: number) {
-    const response = await fetch(`${API_BASE_URL}/api/pedidos/vendedor/${vendedorId}`);
+    const baseUrl = normalizeUrl(API_BASE_URL);
+    const response = await fetch(`${baseUrl}/api/pedidos/vendedor/${vendedorId}`);
     
     if (!response.ok) {
       throw new Error('Failed to fetch pedidos');
@@ -40,7 +48,8 @@ export const api = {
   },
 
   async updatePedidoStatus(id: number, status: string) {
-    const response = await fetch(`${API_BASE_URL}/api/pedidos/${id}/status`, {
+    const baseUrl = normalizeUrl(API_BASE_URL);
+    const response = await fetch(`${baseUrl}/api/pedidos/${id}/status`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
