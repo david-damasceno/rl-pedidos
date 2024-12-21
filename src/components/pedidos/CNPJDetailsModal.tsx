@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -28,7 +29,7 @@ export const CNPJDetailsModal = ({
   onSave,
   initialDetails,
 }: CNPJDetailsModalProps) => {
-  const [details, setDetails] = React.useState<CNPJDetails>(
+  const [details, setDetails] = useState<CNPJDetails>(
     initialDetails || {
       endereco: "",
       email: "",
