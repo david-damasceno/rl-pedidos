@@ -88,11 +88,6 @@ const Login = () => {
             Entrar
           </Button>
         </form>
-        <div className="mt-4 text-center text-sm text-gray-600">
-          <p>Credenciais de demonstração:</p>
-          <p>Vendedor: vendor@test.com / vendor</p>
-          <p>Administrador: admin@test.com / admin</p>
-        </div>
       </div>
     </div>
   );
