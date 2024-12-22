@@ -16,7 +16,6 @@ export interface Pedido {
   clienteRazaoSocial: string;
   clienteEndereco: string;
   clienteContato: string;
-  vendedorId: number;
   vendedorNome: string;
   status: StatusPedido;
   itens: ItemPedido[];

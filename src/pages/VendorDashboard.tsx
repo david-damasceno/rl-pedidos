@@ -6,8 +6,14 @@ import { FormularioCliente } from "@/components/pedidos/FormularioCliente";
 import { TabelaItens } from "@/components/pedidos/TabelaItens";
 import { ListaPedidos } from "@/components/pedidos/ListaPedidos";
 import { Pedido, ItemPedido } from "@/types/pedido";
-import { DatabaseService } from "@/services/database";
-import { LogOut, FileText, ClipboardList, PlusCircle } from "lucide-react";
+import { 
+  LogOut, 
+  FileText, 
+  ClipboardList, 
+  PlusCircle,
+  Send  
+} from "lucide-react";
+import { DatabaseService } from "@/services/database"; // Import the DatabaseService
 
 const mockPedidos: Pedido[] = [
   {
@@ -17,7 +23,6 @@ const mockPedidos: Pedido[] = [
     clienteRazaoSocial: "Empresa Exemplo LTDA",
     clienteEndereco: "Rua Exemplo, 123",
     clienteContato: "contato@exemplo.com",
-    vendedorId: 1, // Adicionado vendedorId
     vendedorNome: "João Silva",
     status: "enviado",
     itens: [],
@@ -72,7 +77,6 @@ const VendorDashboard = () => {
         clienteRazaoSocial: dadosCliente.razaoSocial,
         clienteEndereco: dadosCliente.endereco,
         clienteContato: dadosCliente.contato,
-        vendedorId: user?.id || 1, // Usando o ID do usuário logado
         vendedorNome: user?.name || "Vendedor",
         status: tipo === "pedido" ? "enviado" : "rascunho",
         itens: [...itens],
