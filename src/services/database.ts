@@ -1,16 +1,14 @@
 import prisma from '@/lib/prisma';
-import { Pedido } from '@/types/pedido';
+import { Pedido, ItemPedido } from '@/types/pedido';
 
 export const DatabaseService = {
-  // Usuários
   createUser: async (userData: any) => {
     return await prisma.usuario.create({
       data: userData,
     });
   },
 
-  // Pedidos
-  createPedido: async (pedidoData: Omit<Pedido, 'id'>) => {
+  createPedido: async (pedidoData: Omit<Pedido, 'id'> & { vendedorId: number }) => {
     return await prisma.pedido.create({
       data: {
         clienteCNPJ: pedidoData.clienteCNPJ,
