@@ -6,7 +6,7 @@ import { FormularioCliente } from "@/components/pedidos/FormularioCliente";
 import { TabelaItens } from "@/components/pedidos/TabelaItens";
 import { ListaPedidos } from "@/components/pedidos/ListaPedidos";
 import { Pedido, ItemPedido } from "@/types/pedido";
-import { DatabaseService } from "@/services/database";
+import { pedidosApi } from "@/services/api/pedidos";
 import { LogOut, FileText, ClipboardList, PlusCircle } from "lucide-react";
 
 const mockPedidos: Pedido[] = [
@@ -17,7 +17,7 @@ const mockPedidos: Pedido[] = [
     clienteRazaoSocial: "Empresa Exemplo LTDA",
     clienteEndereco: "Rua Exemplo, 123",
     clienteContato: "contato@exemplo.com",
-    vendedorId: 1, // Adicionado vendedorId
+    vendedorId: 1,
     vendedorNome: "João Silva",
     status: "enviado",
     itens: [],
@@ -66,13 +66,13 @@ const VendorDashboard = () => {
         0
       );
 
-      const novoPedido = await DatabaseService.createPedido({
+      const novoPedido = await pedidosApi.createPedido({
         data: new Date().toISOString(),
         clienteCNPJ: dadosCliente.cnpj,
         clienteRazaoSocial: dadosCliente.razaoSocial,
         clienteEndereco: dadosCliente.endereco,
         clienteContato: dadosCliente.contato,
-        vendedorId: user?.id || 1, // Usando o ID do usuário logado
+        vendedorId: user?.id || 1,
         vendedorNome: user?.name || "Vendedor",
         status: tipo === "pedido" ? "enviado" : "rascunho",
         itens: [...itens],
