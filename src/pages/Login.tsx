@@ -29,7 +29,7 @@ const Login = () => {
   const handleForgotPassword = () => {
     toast({
       title: "Redefinição de senha",
-      description: "Por favor, entre em contato com o administrador do sistema para redefinir sua senha.",
+      description: "Por favor, entre em contato com o David Damasceno para redefinir sua senha.",
     });
   };
 
