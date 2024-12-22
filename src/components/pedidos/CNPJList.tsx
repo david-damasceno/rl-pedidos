@@ -67,6 +67,8 @@ export const CNPJList = ({
           }}
           placeholder="Digite CNPJ adicional"
           className="flex-1"
+          inputMode="numeric"
+          pattern="\d*"
         />
         <Button
           type="button"
@@ -78,6 +80,7 @@ export const CNPJList = ({
           <Plus className="h-4 w-4" />
         </Button>
       </div>
+      
       {cnpjsAdicionais.length > 0 && (
         <div className="mt-2 space-y-2">
           {cnpjsAdicionais.map((cnpj) => (
