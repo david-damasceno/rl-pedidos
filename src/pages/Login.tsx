@@ -29,7 +29,7 @@ const Login = () => {
   const handleForgotPassword = () => {
     toast({
       title: "Redefinição de senha",
-      description: "Por favor, entre em contato com o David Damasceno para redefinir sua senha.",
+      description: "Por favor, entre em contato com o administrador do sistema para redefinir sua senha.",
     });
   };
 
@@ -88,6 +88,11 @@ const Login = () => {
             Entrar
           </Button>
         </form>
+        <div className="mt-4 text-center text-sm text-gray-600">
+          <p>Credenciais de demonstração:</p>
+          <p>Vendedor: vendor@test.com / vendor</p>
+          <p>Administrador: admin@test.com / admin</p>
+        </div>
       </div>
     </div>
   );
