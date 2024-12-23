@@ -1,71 +1,20 @@
-import prisma from '@/lib/prisma';
+import { api } from './api';
 import { Pedido } from '@/types/pedido';
 
 export const DatabaseService = {
-  // Usuários
-  createUser: async (userData: any) => {
-    return await prisma.usuario.create({
-      data: userData,
-    });
-  },
-
-  // Pedidos
-  createPedido: async (pedidoData: Omit<Pedido, 'id'>) => {
-    return await prisma.pedido.create({
-      data: {
-        clienteCNPJ: pedidoData.clienteCNPJ,
-        clienteRazaoSocial: pedidoData.clienteRazaoSocial,
-        clienteEndereco: pedidoData.clienteEndereco,
-        clienteContato: pedidoData.clienteContato,
-        status: pedidoData.status,
-        vendedorId: pedidoData.vendedorId,
-        total: pedidoData.total,
-        itens: {
-          create: pedidoData.itens.map(item => ({
-            produtoCodigo: item.produtoCodigo,
-            descricao: item.descricao,
-            quantidade: item.quantidade,
-            desconto: item.desconto,
-            precoUnitario: item.precoUnitario,
-          })),
-        },
-      },
-      include: {
-        itens: true,
-        vendedor: true,
-      },
-    });
+  createPedido: async (pedido: Omit<Pedido, 'id'>) => {
+    return await api.createPedido(pedido);
   },
 
   getPedidos: async () => {
-    return await prisma.pedido.findMany({
-      include: {
-        itens: true,
-        vendedor: true,
-      },
-    });
+    return await api.getPedidos();
   },
 
   getPedidosByVendedor: async (vendedorId: number) => {
-    return await prisma.pedido.findMany({
-      where: {
-        vendedorId,
-      },
-      include: {
-        itens: true,
-        vendedor: true,
-      },
-    });
+    return await api.getPedidosByVendedor(vendedorId);
   },
 
   updatePedidoStatus: async (id: number, status: string) => {
-    return await prisma.pedido.update({
-      where: { id },
-      data: { status },
-      include: {
-        itens: true,
-        vendedor: true,
-      },
-    });
-  },
+    return await api.updatePedidoStatus(id, status);
+  }
 };
