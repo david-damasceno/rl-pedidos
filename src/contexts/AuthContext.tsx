@@ -10,7 +10,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, role: Role) => Promise<void>;
   logout: () => void;
 }
 
@@ -19,10 +19,10 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, role: Role) => {
     // Mock login - replace with real authentication
     if (email && password) {
-      setUser({ id: "1", name: "Usuário", role: "vendor" });
+      setUser({ id: "1", name: "Usuário", role: role });
     } else {
       throw new Error("Invalid credentials");
     }

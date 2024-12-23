@@ -16,8 +16,8 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login(email, password);
-      navigate("/");
+      await login(email, password, selectedRole);
+      navigate(selectedRole === "admin" ? "/admin" : "/vendor");
     } catch (error) {
       toast({
         title: "Erro",
