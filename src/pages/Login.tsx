@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [selectedRole, setSelectedRole] = useState<"vendor" | "admin">("vendor");
   const { login } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -44,6 +45,24 @@ const Login = () => {
             Digite suas credenciais para acessar o sistema
           </p>
         </div>
+
+        <div className="flex gap-4 justify-center">
+          <Button
+            variant={selectedRole === "vendor" ? "default" : "outline"}
+            onClick={() => setSelectedRole("vendor")}
+            className="flex-1"
+          >
+            Vendedor
+          </Button>
+          <Button
+            variant={selectedRole === "admin" ? "default" : "outline"}
+            onClick={() => setSelectedRole("admin")}
+            className="flex-1"
+          >
+            Administrativo
+          </Button>
+        </div>
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
@@ -88,11 +107,6 @@ const Login = () => {
             Entrar
           </Button>
         </form>
-        <div className="mt-4 text-center text-sm text-gray-600">
-          <p>Credenciais de demonstração:</p>
-          <p>Vendedor: vendor@test.com / vendor</p>
-          <p>Administrador: admin@test.com / admin</p>
-        </div>
       </div>
     </div>
   );

@@ -21,10 +21,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     // Mock login - replace with real authentication
-    if (email === "vendor@test.com" && password === "vendor") {
-      setUser({ id: "1", name: "Test Vendor", role: "vendor" });
-    } else if (email === "admin@test.com" && password === "admin") {
-      setUser({ id: "2", name: "Test Admin", role: "admin" });
+    if (email && password) {
+      setUser({ id: "1", name: "Usuário", role: "vendor" });
     } else {
       throw new Error("Invalid credentials");
     }
