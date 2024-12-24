@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ItemPedido } from "@/types/pedido";
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 
 interface TabelaItensProps {
   itens: ItemPedido[];
@@ -44,19 +44,34 @@ export const TabelaItens = ({ itens, onItensChange }: TabelaItensProps) => {
     return itens.reduce((total, item) => total + calcularTotal(item), 0);
   };
 
+  const handleProdutoCodigoSearch = () => {
+    // Placeholder for future search functionality
+    console.log("Searching for product code:", novoItem.produtoCodigo);
+  };
+
   return (
     <div className="space-y-2 px-2 py-2">
       <h2 className="text-lg font-semibold">Itens do Pedido</h2>
       <div className="grid grid-cols-1 gap-4 mb-4">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          <Input
-            value={novoItem.produtoCodigo || ""}
-            onChange={(e) =>
-              setNovoItem({ ...novoItem, produtoCodigo: e.target.value })
-            }
-            placeholder="Código"
-            className="w-full"
-          />
+          <div className="flex items-center space-x-2">
+            <Input
+              value={novoItem.produtoCodigo || ""}
+              onChange={(e) =>
+                setNovoItem({ ...novoItem, produtoCodigo: e.target.value })
+              }
+              placeholder="Código"
+              className="w-full"
+            />
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={handleProdutoCodigoSearch}
+              className="shrink-0"
+            >
+              <Search className="h-4 w-4" />
+            </Button>
+          </div>
           <Input
             value={novoItem.descricao || ""}
             onChange={(e) =>
