@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Search } from "lucide-react";
 import { CNPJList } from "./CNPJList";
+import { PaymentInfoFields } from "./PaymentInfoFields";
 
 interface FormularioClienteProps {
   onDadosClienteChange: (dados: {
@@ -13,6 +14,10 @@ interface FormularioClienteProps {
     contato: string;
     fornecedor: string;
     cnpjsAdicionais: string[];
+    ipi: string;
+    desconto: string;
+    tipoPagamento: string;
+    condicaoPagamento?: string;
   }) => void;
 }
 
@@ -24,6 +29,12 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
   const [contato, setContato] = useState("");
   const [fornecedor, setFornecedor] = useState("");
   const [cnpjsAdicionais, setCnpjsAdicionais] = useState<string[]>([]);
+  const [paymentInfo, setPaymentInfo] = useState({
+    ipi: "",
+    desconto: "",
+    tipoPagamento: "antecipado",
+    condicaoPagamento: "",
+  });
 
   const formatCNPJ = (value: string) => {
     const numbers = value.replace(/\D/g, "");
@@ -138,6 +149,24 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
     }
   };
 
+  const handlePaymentInfoChange = (info: {
+    ipi: string;
+    desconto: string;
+    tipoPagamento: string;
+    condicaoPagamento?: string;
+  }) => {
+    setPaymentInfo(info);
+    onDadosClienteChange({
+      cnpj,
+      razaoSocial,
+      endereco,
+      contato,
+      fornecedor,
+      cnpjsAdicionais,
+      ...info,
+    });
+  };
+
   return (
     <div className="space-y-6 p-6">
       <h2 className="text-lg font-semibold">Dados do Pedido</h2>
@@ -155,11 +184,13 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
                 contato,
                 fornecedor: e.target.value,
                 cnpjsAdicionais,
+                ...paymentInfo,
               });
             }}
             placeholder="Nome do Fornecedor"
           />
         </div>
+        
         <div>
           <label className="block text-sm font-medium mb-2">CNPJ</label>
           <div className="flex gap-2">
@@ -240,6 +271,8 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
           onAddCNPJ={handleAddCNPJ}
           onRemoveCNPJ={handleRemoveCNPJ}
         />
+
+        <PaymentInfoFields onPaymentInfoChange={handlePaymentInfoChange} />
       </div>
     </div>
   );
