@@ -33,7 +33,7 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
     ipi: "",
     desconto: "",
     tipoPagamento: "antecipado",
-    condicaoPagamento: "",
+    condicaoPagamento: "" as string | undefined // Make condicaoPagamento optional
   });
 
   const formatCNPJ = (value: string) => {
@@ -159,7 +159,12 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
     tipoPagamento: string;
     condicaoPagamento?: string;
   }) => {
-    setPaymentInfo(info);
+    setPaymentInfo(prevInfo => ({
+      ...prevInfo,
+      ...info,
+      // Ensure condicaoPagamento is set to undefined if not provided
+      condicaoPagamento: info.condicaoPagamento || undefined
+    }));
     onDadosClienteChange({
       cnpj,
       razaoSocial,
