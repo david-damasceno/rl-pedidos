@@ -33,7 +33,7 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
     ipi: "",
     desconto: "",
     tipoPagamento: "antecipado",
-    condicaoPagamento: "" as string | undefined // Make condicaoPagamento optional
+    condicaoPagamento: undefined as string | undefined
   });
 
   const formatCNPJ = (value: string) => {
@@ -159,12 +159,7 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
     tipoPagamento: string;
     condicaoPagamento?: string;
   }) => {
-    setPaymentInfo(prevInfo => ({
-      ...prevInfo,
-      ...info,
-      // Ensure condicaoPagamento is set to undefined if not provided
-      condicaoPagamento: info.condicaoPagamento || undefined
-    }));
+    setPaymentInfo(info);
     onDadosClienteChange({
       cnpj,
       razaoSocial,
@@ -208,6 +203,8 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
               onChange={handleCNPJChange}
               placeholder="Digite o CNPJ"
               className="flex-1"
+              inputMode="numeric"
+              pattern="\d*"
             />
             <Button
               type="button"
@@ -220,6 +217,7 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
             </Button>
           </div>
         </div>
+
         <div>
           <label className="block text-sm font-medium mb-2">Razão Social</label>
           <Input
@@ -239,6 +237,7 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
             placeholder="Razão Social"
           />
         </div>
+
         <div>
           <label className="block text-sm font-medium mb-2">Endereço</label>
           <Input
@@ -258,6 +257,7 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
             placeholder="Endereço completo"
           />
         </div>
+
         <div>
           <label className="block text-sm font-medium mb-2">Contato</label>
           <Input
@@ -277,14 +277,14 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
             placeholder="Telefone ou e-mail"
           />
         </div>
+
+        <PaymentInfoFields onPaymentInfoChange={handlePaymentInfoChange} />
         
         <CNPJList
           cnpjsAdicionais={cnpjsAdicionais}
           onAddCNPJ={handleAddCNPJ}
           onRemoveCNPJ={handleRemoveCNPJ}
         />
-
-        <PaymentInfoFields onPaymentInfoChange={handlePaymentInfoChange} />
       </div>
     </div>
   );

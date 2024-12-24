@@ -18,16 +18,29 @@ export const PaymentInfoFields = ({ onPaymentInfoChange }: PaymentInfoFieldsProp
   const [tipoPagamento, setTipoPagamento] = useState("antecipado");
   const [condicaoPagamento, setCondicaoPagamento] = useState("");
 
+  const formatPercentage = (value: string) => {
+    // Remove non-numeric characters except decimal point
+    const numericValue = value.replace(/[^\d.]/g, "");
+    
+    // Ensure only one decimal point
+    const parts = numericValue.split(".");
+    const formattedValue = parts.length > 1 
+      ? `${parts[0]}.${parts[1].slice(0, 2)}`
+      : numericValue;
+
+    return formattedValue ? `${formattedValue}%` : "";
+  };
+
   const handleIpiChange = (value: string) => {
-    const numericValue = value.replace(/\D/g, "");
-    const formattedValue = numericValue ? `${numericValue}%` : "";
+    const formattedValue = formatPercentage(value);
     setIpi(formattedValue);
     updatePaymentInfo(formattedValue, desconto, tipoPagamento, condicaoPagamento);
   };
 
   const handleDescontoChange = (value: string) => {
-    setDesconto(value);
-    updatePaymentInfo(ipi, value, tipoPagamento, condicaoPagamento);
+    const formattedValue = formatPercentage(value);
+    setDesconto(formattedValue);
+    updatePaymentInfo(ipi, formattedValue, tipoPagamento, condicaoPagamento);
   };
 
   const handleTipoPagamentoChange = (value: string) => {
@@ -61,6 +74,7 @@ export const PaymentInfoFields = ({ onPaymentInfoChange }: PaymentInfoFieldsProp
             value={ipi}
             onChange={(e) => handleIpiChange(e.target.value)}
             placeholder="Ex: 6%"
+            inputMode="decimal"
           />
         </div>
         <div>
@@ -68,7 +82,8 @@ export const PaymentInfoFields = ({ onPaymentInfoChange }: PaymentInfoFieldsProp
           <Input
             value={desconto}
             onChange={(e) => handleDescontoChange(e.target.value)}
-            placeholder="Valor do desconto"
+            placeholder="Ex: 10%"
+            inputMode="decimal"
           />
         </div>
       </div>
