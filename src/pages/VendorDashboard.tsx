@@ -13,7 +13,7 @@ import {
   PlusCircle,
   Send  
 } from "lucide-react";
-import { DatabaseService } from "@/services/database"; // Import the DatabaseService
+import { DatabaseService } from "@/services/database";
 
 const mockPedidos: Pedido[] = [
   {
@@ -30,15 +30,37 @@ const mockPedidos: Pedido[] = [
   },
 ];
 
+interface DadosCliente {
+  cnpj: string;
+  razaoSocial: string;
+  endereco: string;
+  email: string;
+  telefone: string;
+  fornecedor: string;
+  cnpjsAdicionais: string[];
+  ipi: string;
+  desconto: string;
+  tipoPagamento: string;
+  condicaoPagamento?: string;
+  observacao: string;
+}
+
 const VendorDashboard = () => {
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<"novo" | "pedidos" | "orcamentos">("novo");
-  const [dadosCliente, setDadosCliente] = useState({
+  const [dadosCliente, setDadosCliente] = useState<DadosCliente>({
     cnpj: "",
     razaoSocial: "",
     endereco: "",
-    contato: "",
+    email: "",
+    telefone: "",
+    fornecedor: "",
+    cnpjsAdicionais: [],
+    ipi: "",
+    desconto: "",
+    tipoPagamento: "antecipado",
+    observacao: "",
   });
   const [itens, setItens] = useState<ItemPedido[]>([]);
   const [pedidos, setPedidos] = useState<Pedido[]>(mockPedidos);
@@ -49,7 +71,14 @@ const VendorDashboard = () => {
       cnpj: "",
       razaoSocial: "",
       endereco: "",
-      contato: "",
+      email: "",
+      telefone: "",
+      fornecedor: "",
+      cnpjsAdicionais: [],
+      ipi: "",
+      desconto: "",
+      tipoPagamento: "antecipado",
+      observacao: "",
     });
     setItens([]);
   };
@@ -76,7 +105,7 @@ const VendorDashboard = () => {
         clienteCNPJ: dadosCliente.cnpj,
         clienteRazaoSocial: dadosCliente.razaoSocial,
         clienteEndereco: dadosCliente.endereco,
-        clienteContato: dadosCliente.contato,
+        clienteContato: `${dadosCliente.email} / ${dadosCliente.telefone}`,
         vendedorNome: user?.name || "Vendedor",
         status: tipo === "pedido" ? "enviado" : "rascunho",
         itens: [...itens],
