@@ -56,6 +56,7 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
         contato,
         fornecedor,
         cnpjsAdicionais,
+        ...paymentInfo
       });
     }
   };
@@ -78,6 +79,7 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
       contato,
       fornecedor,
       cnpjsAdicionais: [...cnpjsAdicionais, novoCnpj],
+      ...paymentInfo
     });
     toast({
       title: "CNPJ Adicional",
@@ -95,6 +97,7 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
       contato,
       fornecedor,
       cnpjsAdicionais: newCnpjs,
+      ...paymentInfo
     });
     toast({
       title: "CNPJ Removido",
@@ -134,6 +137,7 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
         contato,
         fornecedor,
         cnpjsAdicionais,
+        ...paymentInfo
       });
 
       toast({
@@ -184,7 +188,7 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
                 contato,
                 fornecedor: e.target.value,
                 cnpjsAdicionais,
-                ...paymentInfo,
+                ...paymentInfo
               });
             }}
             placeholder="Nome do Fornecedor"
@@ -224,6 +228,7 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
                 contato,
                 fornecedor,
                 cnpjsAdicionais,
+                ...paymentInfo
               });
             }}
             placeholder="Razão Social"
@@ -242,6 +247,7 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
                 contato,
                 fornecedor,
                 cnpjsAdicionais,
+                ...paymentInfo
               });
             }}
             placeholder="Endereço completo"
@@ -260,6 +266,7 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
                 contato: e.target.value,
                 fornecedor,
                 cnpjsAdicionais,
+                ...paymentInfo
               });
             }}
             placeholder="Telefone ou e-mail"
