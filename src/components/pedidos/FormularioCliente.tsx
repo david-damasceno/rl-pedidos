@@ -159,7 +159,10 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
     tipoPagamento: string;
     condicaoPagamento?: string;
   }) => {
-    setPaymentInfo(info);
+    setPaymentInfo(prevInfo => ({
+      ...prevInfo,
+      ...info
+    }));
     onDadosClienteChange({
       cnpj,
       razaoSocial,
