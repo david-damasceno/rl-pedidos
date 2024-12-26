@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Search } from "lucide-react";
 import { CNPJList } from "./CNPJList";
 import { PaymentInfoFields } from "./PaymentInfoFields";
 import { ContactFields } from "./ContactFields";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { FornecedorField } from "./FornecedorField";
+import { CNPJField } from "./CNPJField";
+import { CompanyInfoFields } from "./CompanyInfoFields";
 
 interface FormularioClienteProps {
   onDadosClienteChange: (dados: {
@@ -43,23 +43,6 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
     condicaoPagamento: undefined as string | undefined
   });
 
-  const formatCNPJ = (value: string) => {
-    const numbers = value.replace(/\D/g, "");
-    return numbers.replace(
-      /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2}).*/,
-      "$1.$2.$3/$4-$5"
-    );
-  };
-
-  const handleCNPJChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = e.target.value.replace(/\D/g, "");
-    if (rawValue.length <= 14) {
-      const formattedValue = formatCNPJ(rawValue);
-      setCnpj(formattedValue);
-      updateDadosCliente({ cnpj: formattedValue });
-    }
-  };
-
   const updateDadosCliente = (newData: Partial<Parameters<typeof onDadosClienteChange>[0]>) => {
     onDadosClienteChange({
       cnpj,
@@ -73,19 +56,6 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
       ...paymentInfo,
       ...newData
     });
-  };
-
-  const handlePaymentInfoChange = (info: {
-    ipi: string;
-    desconto: string;
-    tipoPagamento: string;
-    condicaoPagamento?: string;
-  }) => {
-    setPaymentInfo(prevInfo => ({
-      ...prevInfo,
-      ...info
-    }));
-    updateDadosCliente(info);
   };
 
   const consultarCNPJ = async () => {
@@ -130,68 +100,52 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
     }
   };
 
+  const handlePaymentInfoChange = (info: {
+    ipi: string;
+    desconto: string;
+    tipoPagamento: string;
+    condicaoPagamento?: string;
+  }) => {
+    setPaymentInfo(prevInfo => ({
+      ...prevInfo,
+      ...info
+    }));
+    updateDadosCliente(info);
+  };
+
   return (
     <div className="space-y-6 p-6">
       <h2 className="text-lg font-semibold">Dados do Pedido</h2>
       <div className="grid grid-cols-1 gap-6">
-        <div>
-          <label className="block text-sm font-medium mb-2">Fornecedor</label>
-          <Input
-            value={fornecedor}
-            onChange={(e) => {
-              setFornecedor(e.target.value);
-              updateDadosCliente({ fornecedor: e.target.value });
-            }}
-            placeholder="Nome do Fornecedor"
-          />
-        </div>
+        <FornecedorField
+          value={fornecedor}
+          onChange={(value) => {
+            setFornecedor(value);
+            updateDadosCliente({ fornecedor: value });
+          }}
+        />
         
-        <div>
-          <label className="block text-sm font-medium mb-2">CNPJ</label>
-          <div className="flex gap-2">
-            <Input
-              value={cnpj}
-              onChange={handleCNPJChange}
-              placeholder="Digite o CNPJ"
-              className="flex-1"
-              inputMode="numeric"
-              pattern="\d*"
-            />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={consultarCNPJ}
-              className="shrink-0 w-10 px-0"
-              title="Buscar CNPJ"
-            >
-              <Search className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        <CNPJField
+          value={cnpj}
+          onChange={(value) => {
+            setCnpj(value);
+            updateDadosCliente({ cnpj: value });
+          }}
+          onSearch={consultarCNPJ}
+        />
 
-        <div>
-          <label className="block text-sm font-medium mb-2">Razão Social</label>
-          <Input
-            value={razaoSocial}
-            onChange={(e) => {
-              setRazaoSocial(e.target.value);
-              updateDadosCliente({ razaoSocial: e.target.value });
-            }}
-            placeholder="Razão Social"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2">Endereço</label>
-          <Input
-            value={endereco}
-            onChange={(e) => {
-              setEndereco(e.target.value);
-              updateDadosCliente({ endereco: e.target.value });
-            }}
-            placeholder="Endereço completo"
-          />
-        </div>
+        <CompanyInfoFields
+          razaoSocial={razaoSocial}
+          endereco={endereco}
+          onRazaoSocialChange={(value) => {
+            setRazaoSocial(value);
+            updateDadosCliente({ razaoSocial: value });
+          }}
+          onEnderecoChange={(value) => {
+            setEndereco(value);
+            updateDadosCliente({ endereco: value });
+          }}
+        />
 
         <ContactFields
           email={email}
