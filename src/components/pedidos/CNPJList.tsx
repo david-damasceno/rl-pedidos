@@ -28,20 +28,34 @@ export const CNPJList = ({
 
   const formatCNPJ = (value: string) => {
     const numbers = value.replace(/\D/g, "");
-    return numbers.replace(
-      /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2}).*/,
-      "$1.$2.$3/$4-$5"
-    );
+    if (numbers.length <= 14) {
+      return numbers.replace(
+        /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,
+        (_, g1, g2, g3, g4, g5) => {
+          if (g5) return `${g1}.${g2}.${g3}/${g4}-${g5}`;
+          if (g4) return `${g1}.${g2}.${g3}/${g4}`;
+          if (g3) return `${g1}.${g2}.${g3}`;
+          if (g2) return `${g1}.${g2}`;
+          return g1;
+        }
+      );
+    }
+    return value.slice(0, 18);
+  };
+
+  const validateCNPJ = (cnpj: string) => {
+    const numbers = cnpj.replace(/\D/g, "");
+    return numbers.length === 14;
   };
 
   const handleAddCNPJ = () => {
-    if (cnpjAdicional.length === 18) {
+    if (validateCNPJ(cnpjAdicional)) {
       onAddCNPJ(cnpjAdicional);
       setCnpjAdicional("");
     } else {
       toast({
         title: "CNPJ Inválido",
-        description: "Por favor, digite um CNPJ válido",
+        description: "Por favor, digite um CNPJ válido com 14 dígitos",
         variant: "destructive",
       });
     }
@@ -55,20 +69,22 @@ export const CNPJList = ({
     });
   };
 
+  const handleCNPJInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedValue = formatCNPJ(e.target.value);
+    setCnpjAdicional(formattedValue);
+  };
+
   return (
     <div className="space-y-4">
       <label className="block text-sm font-medium">CNPJs Adicionais</label>
       <div className="flex gap-2">
         <Input
           value={cnpjAdicional}
-          onChange={(e) => {
-            const formattedValue = formatCNPJ(e.target.value.replace(/\D/g, ""));
-            setCnpjAdicional(formattedValue);
-          }}
-          placeholder="Digite CNPJ adicional"
+          onChange={handleCNPJInput}
+          placeholder="00.000.000/0000-00"
           className="flex-1"
+          maxLength={18}
           inputMode="numeric"
-          pattern="\d*"
         />
         <Button
           type="button"
