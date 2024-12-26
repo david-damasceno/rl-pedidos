@@ -8,7 +8,6 @@ import { PaymentInfoFields } from "./PaymentInfoFields";
 import { ContactFields } from "./ContactFields";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { formatCNPJ, cleanCNPJ } from "@/utils/formatters";
 
 interface FormularioClienteProps {
   onDadosClienteChange: (dados: {
@@ -44,10 +43,18 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
     condicaoPagamento: undefined as string | undefined
   });
 
+  const formatCNPJ = (value: string) => {
+    const numbers = value.replace(/\D/g, "");
+    return numbers.replace(
+      /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2}).*/,
+      "$1.$2.$3/$4-$5"
+    );
+  };
+
   const handleCNPJChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = cleanCNPJ(e.target.value);
+    const rawValue = e.target.value.replace(/\D/g, "");
     if (rawValue.length <= 14) {
-      const formattedValue = rawValue.length ? formatCNPJ(rawValue) : rawValue;
+      const formattedValue = formatCNPJ(rawValue);
       setCnpj(formattedValue);
       updateDadosCliente({ cnpj: formattedValue });
     }
@@ -82,7 +89,7 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
   };
 
   const consultarCNPJ = async () => {
-    const numerosCNPJ = cleanCNPJ(cnpj);
+    const numerosCNPJ = cnpj.replace(/\D/g, "");
     if (numerosCNPJ.length !== 14) {
       toast({
         title: "CNPJ Inválido",
@@ -148,6 +155,7 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
               placeholder="Digite o CNPJ"
               className="flex-1"
               inputMode="numeric"
+              pattern="\d*"
             />
             <Button
               type="button"
