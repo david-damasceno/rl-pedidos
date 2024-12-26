@@ -45,30 +45,19 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
 
   const formatCNPJ = (value: string) => {
     const numbers = value.replace(/\D/g, "");
-    if (numbers.length <= 14) {
-      return numbers.replace(
-        /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,
-        (_, g1, g2, g3, g4, g5) => {
-          if (g5) return `${g1}.${g2}.${g3}/${g4}-${g5}`;
-          if (g4) return `${g1}.${g2}.${g3}/${g4}`;
-          if (g3) return `${g1}.${g2}.${g3}`;
-          if (g2) return `${g1}.${g2}`;
-          return g1;
-        }
-      );
-    }
-    return value.slice(0, 18);
-  };
-
-  const validateCNPJ = (cnpj: string) => {
-    const numbers = cnpj.replace(/\D/g, "");
-    return numbers.length === 14;
+    return numbers.replace(
+      /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2}).*/,
+      "$1.$2.$3/$4-$5"
+    );
   };
 
   const handleCNPJChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formattedValue = formatCNPJ(e.target.value);
-    setCnpj(formattedValue);
-    updateDadosCliente({ cnpj: formattedValue });
+    const rawValue = e.target.value.replace(/\D/g, "");
+    if (rawValue.length <= 14) {
+      const formattedValue = formatCNPJ(rawValue);
+      setCnpj(formattedValue);
+      updateDadosCliente({ cnpj: formattedValue });
+    }
   };
 
   const updateDadosCliente = (newData: Partial<Parameters<typeof onDadosClienteChange>[0]>) => {
@@ -100,7 +89,8 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
   };
 
   const consultarCNPJ = async () => {
-    if (!validateCNPJ(cnpj)) {
+    const numerosCNPJ = cnpj.replace(/\D/g, "");
+    if (numerosCNPJ.length !== 14) {
       toast({
         title: "CNPJ Inválido",
         description: "Por favor, digite um CNPJ válido com 14 dígitos",
@@ -162,10 +152,10 @@ export const FormularioCliente = ({ onDadosClienteChange }: FormularioClientePro
             <Input
               value={cnpj}
               onChange={handleCNPJChange}
-              placeholder="00.000.000/0000-00"
+              placeholder="Digite o CNPJ"
               className="flex-1"
-              maxLength={18}
               inputMode="numeric"
+              pattern="\d*"
             />
             <Button
               type="button"
