@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { CNPJDetailsModal, CNPJDetails } from "./CNPJDetailsModal";
 import { useToast } from "@/hooks/use-toast";
+import { formatCNPJ, cleanCNPJ } from "@/utils/formatters";
 
 interface CNPJListProps {
   cnpjsAdicionais: string[];
@@ -26,16 +27,17 @@ export const CNPJList = ({
   const [selectedCNPJ, setSelectedCNPJ] = useState<string | null>(null);
   const [cnpjDetails, setCnpjDetails] = useState<Record<string, CNPJDetails>>({});
 
-  const formatCNPJ = (value: string) => {
-    const numbers = value.replace(/\D/g, "");
-    return numbers.replace(
-      /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2}).*/,
-      "$1.$2.$3/$4-$5"
-    );
+  const handleCNPJChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = cleanCNPJ(e.target.value);
+    if (rawValue.length <= 14) {
+      const formattedValue = rawValue.length ? formatCNPJ(rawValue) : rawValue;
+      setCnpjAdicional(formattedValue);
+    }
   };
 
   const handleAddCNPJ = () => {
-    if (cnpjAdicional.length === 18) {
+    const cleanedCNPJ = cleanCNPJ(cnpjAdicional);
+    if (cleanedCNPJ.length === 14) {
       onAddCNPJ(cnpjAdicional);
       setCnpjAdicional("");
     } else {
@@ -61,14 +63,10 @@ export const CNPJList = ({
       <div className="flex gap-2">
         <Input
           value={cnpjAdicional}
-          onChange={(e) => {
-            const formattedValue = formatCNPJ(e.target.value.replace(/\D/g, ""));
-            setCnpjAdicional(formattedValue);
-          }}
+          onChange={handleCNPJChange}
           placeholder="Digite CNPJ adicional"
           className="flex-1"
           inputMode="numeric"
-          pattern="\d*"
         />
         <Button
           type="button"
