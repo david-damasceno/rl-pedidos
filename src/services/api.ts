@@ -2,9 +2,15 @@ import { Pedido } from '@/types/pedido';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
-// Remove trailing slash and colon from URL if present
+// Properly normalize URL by removing trailing slashes and ensuring no double colons
 const normalizeUrl = (url: string) => {
-  return url.replace(/[:\/]$/, '');
+  // Remove trailing slashes
+  let normalized = url.replace(/\/+$/, '');
+  // Remove any malformed port separators
+  normalized = normalized.replace(/:[\/]*$/, '');
+  // Ensure proper protocol separator
+  normalized = normalized.replace(/(?<!:)\/\/+/g, '/');
+  return normalized;
 };
 
 export const api = {
