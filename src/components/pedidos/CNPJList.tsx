@@ -1,30 +1,37 @@
-import { X, Plus, Info } from "lucide-react";
+import { X, Plus, Info, CheckSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { CNPJDetailsModal, CNPJDetails } from "./CNPJDetailsModal";
 import { useToast } from "@/hooks/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface CNPJListProps {
   cnpjsAdicionais: string[];
   onAddCNPJ: (cnpj: string) => void;
   onRemoveCNPJ: (cnpj: string) => void;
+  onCNPJSelectionChange?: (cnpj: string, isSelected: boolean) => void;
 }
 
 interface CNPJWithDetails {
   cnpj: string;
   details?: CNPJDetails;
+  isSelected: boolean;
 }
 
 export const CNPJList = ({
   cnpjsAdicionais,
   onAddCNPJ,
   onRemoveCNPJ,
+  onCNPJSelectionChange,
 }: CNPJListProps) => {
   const { toast } = useToast();
   const [cnpjAdicional, setCnpjAdicional] = useState("");
   const [selectedCNPJ, setSelectedCNPJ] = useState<string | null>(null);
   const [cnpjDetails, setCnpjDetails] = useState<Record<string, CNPJDetails>>({});
+  const [selectedCNPJs, setSelectedCNPJs] = useState<Record<string, boolean>>(
+    cnpjsAdicionais.reduce((acc, cnpj) => ({ ...acc, [cnpj]: true }), {})
+  );
 
   const formatCNPJ = (value: string) => {
     const numbers = value.replace(/\D/g, "");
@@ -37,6 +44,7 @@ export const CNPJList = ({
   const handleAddCNPJ = () => {
     if (cnpjAdicional.length === 18) {
       onAddCNPJ(cnpjAdicional);
+      setSelectedCNPJs(prev => ({ ...prev, [cnpjAdicional]: true }));
       setCnpjAdicional("");
     } else {
       toast({
@@ -55,9 +63,42 @@ export const CNPJList = ({
     });
   };
 
+  const handleCNPJSelection = (cnpj: string, checked: boolean) => {
+    setSelectedCNPJs(prev => ({ ...prev, [cnpj]: checked }));
+    if (onCNPJSelectionChange) {
+      onCNPJSelectionChange(cnpj, checked);
+    }
+  };
+
+  const handleUncheckAll = () => {
+    const newSelection = Object.keys(selectedCNPJs).reduce(
+      (acc, cnpj) => ({ ...acc, [cnpj]: false }),
+      {}
+    );
+    setSelectedCNPJs(newSelection);
+    cnpjsAdicionais.forEach(cnpj => {
+      if (onCNPJSelectionChange) {
+        onCNPJSelectionChange(cnpj, false);
+      }
+    });
+  };
+
   return (
     <div className="space-y-4">
-      <label className="block text-sm font-medium">CNPJs Adicionais</label>
+      <div className="flex items-center justify-between">
+        <label className="block text-sm font-medium">CNPJs Adicionais</label>
+        {cnpjsAdicionais.length > 0 && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleUncheckAll}
+            className="text-sm text-gray-500 hover:text-gray-700"
+          >
+            Desmarcar todos
+          </Button>
+        )}
+      </div>
+      
       <div className="flex gap-2">
         <Input
           value={cnpjAdicional}
@@ -88,7 +129,16 @@ export const CNPJList = ({
               key={cnpj}
               className="flex items-center justify-between bg-gray-50 p-3 rounded-md"
             >
-              <span className="text-sm text-gray-600">{cnpj}</span>
+              <div className="flex items-center gap-3">
+                <Checkbox
+                  checked={selectedCNPJs[cnpj]}
+                  onCheckedChange={(checked) => 
+                    handleCNPJSelection(cnpj, checked as boolean)
+                  }
+                  id={`cnpj-${cnpj}`}
+                />
+                <span className="text-sm text-gray-600">{cnpj}</span>
+              </div>
               <div className="flex gap-2">
                 <Button
                   type="button"

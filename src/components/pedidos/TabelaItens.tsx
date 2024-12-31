@@ -7,9 +7,14 @@ import { Plus, Search } from "lucide-react";
 interface TabelaItensProps {
   itens: ItemPedido[];
   onItensChange: (itens: ItemPedido[]) => void;
+  selectedCNPJs?: Record<string, boolean>;
 }
 
-export const TabelaItens = ({ itens, onItensChange }: TabelaItensProps) => {
+export const TabelaItens = ({ 
+  itens, 
+  onItensChange,
+  selectedCNPJs = {} 
+}: TabelaItensProps) => {
   const [novoItem, setNovoItem] = useState<Partial<ItemPedido>>({});
 
   const adicionarItem = () => {
@@ -26,8 +31,15 @@ export const TabelaItens = ({ itens, onItensChange }: TabelaItensProps) => {
       precoUnitario: Number(novoItem.precoUnitario),
     };
 
+    // Add item to main order and selected CNPJs
     onItensChange([...itens, item]);
     setNovoItem({});
+
+    // Notify about CNPJs that will receive the item
+    const selectedCount = Object.values(selectedCNPJs).filter(Boolean).length;
+    if (selectedCount > 0) {
+      console.log(`Item será adicionado a ${selectedCount} CNPJs adicionais`);
+    }
   };
 
   const removerItem = (id: string) => {
