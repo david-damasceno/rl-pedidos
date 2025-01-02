@@ -6,8 +6,9 @@ type Role = 'vendor' | 'admin';
 
 interface User {
   id: string;
-  name: string;
+  email: string;
   role: Role;
+  nome: string;
 }
 
 interface AuthContextType {
@@ -22,26 +23,47 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
 
+  const fetchUserProfile = async (userId: string) => {
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching user profile:', error);
+      return null;
+    }
+
+    return profile;
+  };
+
   useEffect(() => {
-    // Verificar sessão atual
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        setUser({
-          id: session.user.id,
-          name: session.user.email || '',
-          role: session.user.user_metadata.role || 'vendor'
-        });
+        const profile = await fetchUserProfile(session.user.id);
+        if (profile) {
+          setUser({
+            id: session.user.id,
+            email: profile.email,
+            nome: profile.nome,
+            role: profile.role as Role,
+          });
+        }
       }
     });
 
-    // Escutar mudanças na autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
-        setUser({
-          id: session.user.id,
-          name: session.user.email || '',
-          role: session.user.user_metadata.role || 'vendor'
-        });
+        const profile = await fetchUserProfile(session.user.id);
+        if (profile) {
+          setUser({
+            id: session.user.id,
+            email: profile.email,
+            nome: profile.nome,
+            role: profile.role as Role,
+          });
+        }
       } else {
         setUser(null);
       }
@@ -60,11 +82,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) throw error;
 
       if (data.user) {
-        setUser({
-          id: data.user.id,
-          name: data.user.email || '',
-          role: data.user.user_metadata.role || 'vendor'
-        });
+        const profile = await fetchUserProfile(data.user.id);
+        if (profile) {
+          setUser({
+            id: data.user.id,
+            email: profile.email,
+            nome: profile.nome,
+            role: profile.role as Role,
+          });
+        }
       }
     } catch (error) {
       toast({
