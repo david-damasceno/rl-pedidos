@@ -159,7 +159,7 @@ const AdminDashboard = () => {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Gestão de Pedidos</h1>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">Bem-vindo, {user?.name}</span>
+            <span className="text-sm text-gray-600">Bem-vindo, {user?.nome}</span>
             <Button variant="outline" onClick={logout}>
               Sair
             </Button>
