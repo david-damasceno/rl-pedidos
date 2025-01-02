@@ -4,35 +4,19 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { Auth } from '@supabase/auth-ui-react';
+import { ThemeSupa } from '@supabase/auth-ui-shared';
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [selectedRole, setSelectedRole] = useState<"vendor" | "admin">("vendor");
-  const { login } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { user } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await login(email, password);
-      navigate(selectedRole === "admin" ? "/admin" : "/vendor");
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Credenciais inválidas. Por favor, tente novamente.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleForgotPassword = () => {
-    toast({
-      title: "Redefinição de senha",
-      description: "Por favor, entre em contato com o administrador do sistema para redefinir sua senha.",
-    });
-  };
+  // Redirecionar se já estiver autenticado
+  if (user) {
+    navigate(user.role === "admin" ? "/admin" : "/vendor");
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -46,67 +30,54 @@ const Login = () => {
           </p>
         </div>
 
-        <div className="flex gap-4 justify-center">
-          <Button
-            variant={selectedRole === "vendor" ? "default" : "outline"}
-            onClick={() => setSelectedRole("vendor")}
-            className="flex-1"
-          >
-            Vendedor
-          </Button>
-          <Button
-            variant={selectedRole === "admin" ? "default" : "outline"}
-            onClick={() => setSelectedRole("admin")}
-            className="flex-1"
-          >
-            Administrativo
-          </Button>
-        </div>
-
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                E-mail
-              </label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="mt-1"
-                placeholder="Digite seu e-mail"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Senha
-              </label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="mt-1"
-                placeholder="Digite sua senha"
-              />
-            </div>
-          </div>
-          <div className="flex items-center justify-end">
-            <button
-              type="button"
-              onClick={handleForgotPassword}
-              className="text-sm text-blue-600 hover:text-blue-500"
-            >
-              Esqueceu sua senha?
-            </button>
-          </div>
-          <Button type="submit" className="w-full">
-            Entrar
-          </Button>
-        </form>
+        <Auth
+          supabaseClient={supabase}
+          appearance={{
+            theme: ThemeSupa,
+            variables: {
+              default: {
+                colors: {
+                  brand: '#2563eb',
+                  brandAccent: '#1d4ed8',
+                }
+              }
+            },
+            className: {
+              container: 'w-full',
+              button: 'w-full',
+              input: 'rounded-md border border-gray-300',
+            }
+          }}
+          providers={['google']}
+          redirectTo={window.location.origin}
+          localization={{
+            variables: {
+              sign_in: {
+                email_label: 'E-mail',
+                password_label: 'Senha',
+                button_label: 'Entrar',
+                loading_button_label: 'Entrando...',
+                social_provider_text: 'Entrar com {{provider}}',
+                link_text: 'Já tem uma conta? Entre',
+              },
+              sign_up: {
+                email_label: 'E-mail',
+                password_label: 'Senha',
+                button_label: 'Cadastrar',
+                loading_button_label: 'Cadastrando...',
+                social_provider_text: 'Cadastrar com {{provider}}',
+                link_text: 'Não tem uma conta? Cadastre-se',
+              },
+              forgotten_password: {
+                email_label: 'E-mail',
+                password_label: 'Senha',
+                button_label: 'Enviar instruções',
+                loading_button_label: 'Enviando instruções...',
+                link_text: 'Esqueceu sua senha?',
+              },
+            },
+          }}
+        />
       </div>
     </div>
   );
