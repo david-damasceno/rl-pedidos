@@ -39,6 +39,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
+    // Check current session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         const profile = await fetchUserProfile(session.user.id);
@@ -53,6 +54,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     });
 
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         const profile = await fetchUserProfile(session.user.id);
@@ -93,6 +95,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       }
     } catch (error) {
+      console.error('Login error:', error);
       toast({
         title: "Erro ao fazer login",
         description: "Verifique suas credenciais e tente novamente",
