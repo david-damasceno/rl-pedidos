@@ -1,19 +1,17 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
-import { Session, User } from '@supabase/supabase-js';
 
 type Role = 'vendor' | 'admin';
 
-interface AuthUser {
+interface User {
   id: string;
   name: string;
   role: Role;
 }
 
 interface AuthContextType {
-  user: AuthUser | null;
-  session: Session | null;
+  user: User | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -21,24 +19,29 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     // Verificar sessão atual
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
       if (session?.user) {
-        updateUserData(session.user);
+        setUser({
+          id: session.user.id,
+          name: session.user.email || '',
+          role: session.user.user_metadata.role || 'vendor'
+        });
       }
     });
 
     // Escutar mudanças na autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
       if (session?.user) {
-        updateUserData(session.user);
+        setUser({
+          id: session.user.id,
+          name: session.user.email || '',
+          role: session.user.user_metadata.role || 'vendor'
+        });
       } else {
         setUser(null);
       }
@@ -46,31 +49,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     return () => subscription.unsubscribe();
   }, []);
-
-  const updateUserData = async (authUser: User) => {
-    try {
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', authUser.id)
-        .single();
-
-      if (error) throw error;
-
-      setUser({
-        id: authUser.id,
-        name: profile.name || authUser.email || '',
-        role: profile.role || 'vendor'
-      });
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
-      toast({
-        title: "Erro ao carregar perfil",
-        description: "Não foi possível carregar as informações do usuário",
-        variant: "destructive",
-      });
-    }
-  };
 
   const login = async (email: string, password: string) => {
     try {
@@ -82,7 +60,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) throw error;
 
       if (data.user) {
-        await updateUserData(data.user);
+        setUser({
+          id: data.user.id,
+          name: data.user.email || '',
+          role: data.user.user_metadata.role || 'vendor'
+        });
       }
     } catch (error) {
       toast({
@@ -98,7 +80,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       await supabase.auth.signOut();
       setUser(null);
-      setSession(null);
     } catch (error) {
       toast({
         title: "Erro ao fazer logout",
@@ -110,7 +91,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
